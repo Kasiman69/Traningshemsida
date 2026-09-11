@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Min träning</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Min träning</h1>
+
+    <h2>Push</h2>
+
+    <h3>Bänkpress</h3>
+
+    <label for="benchWeight">Vikt (kg):</label>
+    <input id="benchWeight" type="number">
+
+    <label for="benchReps">Reps:</label>
+    <input id="benchReps" type="number">
+
+    <button id="benchSaveButton">Spara</button>
+
+    <h3>Axelpress</h3>
+
+    <label for="shoulderWeight">Vikt (kg):</label>
+    <input id="shoulderWeight" type="number">
+
+    <label for="shoulderReps">Reps:</label>
+    <input id="shoulderReps" type="number">
+
+    <button id="shoulderSaveButton">Spara</button>
+
+
+    <h3>Tricep Extension</h3>
+
+    <label for="tricepWeight">Vikt (kg):</label>
+    <input id="tricepWeight" type="number">
+
+    <label for="tricepReps">Reps:</label>
+    <input id="tricepReps" type="number">
+
+    <button id="tricepSaveButton">Spara</button>
+
+    <h2>Pull</h2>
+
+    <h3>Marklyft</h3>
+
+    <label for="deadliftWeight">Vikt (kg):</label>
+    <input id="deadliftWeight" type="number">
+
+    <label for="deadliftReps">Reps:</label>
+    <input id="deadliftReps" type="number">
+
+    <button id="deadliftSaveButton">Spara</button>
+
+    <h3>Pull-up</h3>
+
+    <label for="pullupWeight">Vikt (kg):</label>
+    <input id="pullupWeight" type="number">
+
+    <label for="pullupReps">Reps:</label>
+    <input id="pullupReps" type="number">
+
+    <button id="pullupSaveButton">Spara</button>
+    
+    <h3>Curls</h3>
+
+    <label for="curlWeight">Vikt (kg):</label>
+    <input id="curlWeight" type="number">
+
+    <label for="curlReps">Reps:</label>
+    <input id="curlReps" type="number">
+
+    <button id="curlSaveButton">Spara</button>
+
+    <h2>Legs</h2>
+
+    <h3>Squat</h3>
+
+    <label for="squatWeight">Vikt (kg):</label>
+    <input id="squatWeight" type="number">
+
+    <label for="squatReps">Reps:</label>
+    <input id="squatReps" type="number">
+
+    <button id="squatSaveButton">Spara</button>
+
+    <h3>Leg extension</h3>
+
+    <label for="legExtensionWeight">Vikt (kg):</label>
+    <input id="legExtensionWeight" type="number">
+
+    <label for="legExtensionReps">Reps:</label>
+    <input id="legExtensionReps" type="number">
+
+    <button id="legExtensionSaveButton">Spara</button>
+
+    <h3>Leg curl</h3>
+
+    <label for="legCurlWeight">Vikt (kg):</label>
+    <input id="legCurlWeight" type="number">
+
+    <label for="legCurlReps">Reps:</label>
+    <input id="legCurlReps" type="number">
+
+    <button id="legCurlSaveButton">Spara</button>
+
+    <h3>Calf raises</h3>
+
+    <label for="calfRaiseWeight">Vikt (kg):</label>
+    <input id="calfRaiseWeight" type="number">
+
+    <label for="calfRaiseReps">Reps:</label>
+    <input id="calfRaiseReps" type="number">
+
+    <button id="calfRaiseSaveButton">Spara</button>
+
+    <h2>Historik</h2>
+
+    <table cellpadding="20">
+        <tr>
+            <td valign="top">
+                <h3>Push historik</h3>
+                <div id="pushHistory"></div>
+            </td>
+
+            <td valign="top">
+                <h3>Pull historik</h3>
+                <div id="pullHistory"></div>
+            </td>
+
+            <td valign="top">
+                <h3>Legs historik</h3>
+                <div id="legsHistory"></div>
+            </td>
+        </tr>
+    </table>
+
+    <script src="dist/script.js"></script>
+
+</body>
+</html>
