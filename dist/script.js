@@ -145,6 +145,3 @@ calfRaiseSaveButton.addEventListener("click", () => {
     saveWorkout("Legs", "Calf Raise", weight, reps);
 });
 renderHistory();
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./dist/service-worker.js");
-}
