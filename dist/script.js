@@ -6,12 +6,15 @@ const homePage = document.getElementById("homePage");
 const pushPage = document.getElementById("pushPage");
 const pullPage = document.getElementById("pullPage");
 const legsPage = document.getElementById("legsPage");
+const historyPage = document.getElementById("historyPage");
 const choosePushButton = document.getElementById("choosePushButton");
 const choosePullButton = document.getElementById("choosePullButton");
 const chooseLegsButton = document.getElementById("chooseLegsButton");
+const historyButton = document.getElementById("historyButton");
 const backFromPushButton = document.getElementById("backFromPushButton");
 const backFromPullButton = document.getElementById("backFromPullButton");
 const backFromLegsButton = document.getElementById("backFromLegsButton");
+const backFromHistoryButton = document.getElementById("backFromHistoryButton");
 // =========================
 // VISA SIDA
 // =========================
@@ -20,6 +23,7 @@ function showPage(page) {
     pushPage.classList.add("hidden");
     pullPage.classList.add("hidden");
     legsPage.classList.add("hidden");
+    historyPage.classList.add("hidden");
     page.classList.remove("hidden");
 }
 // =========================
@@ -202,6 +206,13 @@ backFromPullButton.addEventListener("click", () => {
 backFromLegsButton.addEventListener("click", () => {
     showPage(homePage);
 });
+historyButton.addEventListener("click", () => {
+    showPage(historyPage);
+    renderHistory();
+});
+backFromHistoryButton.addEventListener("click", () => {
+    showPage(homePage);
+});
 // =========================
 // PUSH
 // =========================
@@ -307,33 +318,72 @@ function renderHistory() {
     pushHistory.innerHTML = "";
     pullHistory.innerHTML = "";
     legsHistory.innerHTML = "";
-    for (const workout of workouts.reverse()) {
-        const entry = document.createElement("p");
-        entry.textContent =
-            `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps — ${workout.date} `;
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Radera";
-        deleteButton.addEventListener("click", () => {
-            deleteWorkout(workout.id);
-        });
-        entry.appendChild(deleteButton);
-        if (workout.category === "Push") {
-            pushHistory.appendChild(entry);
+    const sessions = [];
+    // Gå bakifrån så att det senaste passet kommer först
+    const reversedWorkouts = [...workouts].reverse();
+    for (const workout of reversedWorkouts) {
+        // Nya pass har sessionId.
+        // Gamla sparningar använder kategori + datum.
+        const sessionId = workout.sessionId ||
+            `${workout.category}-${workout.date}`;
+        // Kolla om vi redan har lagt till detta pass
+        let session = sessions.find(session => session.id === sessionId);
+        if (!session) {
+            session = {
+                id: sessionId,
+                category: workout.category,
+                date: workout.date,
+                workouts: []
+            };
+            sessions.push(session);
         }
-        else if (workout.category === "Pull") {
-            pullHistory.appendChild(entry);
+        session.workouts.push(workout);
+    }
+    // Visa passen
+    for (const session of sessions) {
+        const sessionElement = document.createElement("div");
+        sessionElement.className = "history-session";
+        const date = document.createElement("h4");
+        date.textContent = session.date;
+        sessionElement.appendChild(date);
+        for (const workout of session.workouts) {
+            const entry = document.createElement("p");
+            entry.textContent =
+                `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps`;
+            sessionElement.appendChild(entry);
         }
-        else if (workout.category === "Legs") {
-            legsHistory.appendChild(entry);
+        // Radera-knappar
+        for (const workout of session.workouts) {
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Radera pass";
+            deleteButton.addEventListener("click", () => {
+                deleteSession(session.id);
+            });
+            sessionElement.appendChild(deleteButton);
+            break;
+        }
+        if (session.category === "Push") {
+            pushHistory.appendChild(sessionElement);
+        }
+        else if (session.category === "Pull") {
+            pullHistory.appendChild(sessionElement);
+        }
+        else if (session.category === "Legs") {
+            legsHistory.appendChild(sessionElement);
         }
     }
 }
 // =========================
 // RADERA
 // =========================
-function deleteWorkout(id) {
-    const workouts = getWorkouts().filter(workout => workout.id !== id);
-    localStorage.setItem("workouts", JSON.stringify(workouts));
+function deleteSession(sessionId) {
+    const workouts = getWorkouts();
+    const remainingWorkouts = workouts.filter(workout => {
+        const workoutSessionId = workout.sessionId ||
+            `${workout.category}-${workout.date}`;
+        return workoutSessionId !== sessionId;
+    });
+    localStorage.setItem("workouts", JSON.stringify(remainingWorkouts));
     renderHistory();
 }
 // =========================
