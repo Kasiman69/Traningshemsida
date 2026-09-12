@@ -11,7 +11,7 @@ const historyPage = document.getElementById("historyPage") as HTMLElement;
 const choosePushButton = document.getElementById("choosePushButton") as HTMLButtonElement;
 const choosePullButton = document.getElementById("choosePullButton") as HTMLButtonElement;
 const chooseLegsButton = document.getElementById("chooseLegsButton") as HTMLButtonElement;
-const historyButton = document.getElementById("historyButton") as HTMLButtonElement;
+const historyButton = document.getElementById("chooseHistoryButton") as HTMLButtonElement;
 
 const backFromPushButton = document.getElementById("backFromPushButton") as HTMLButtonElement;
 const backFromPullButton = document.getElementById("backFromPullButton") as HTMLButtonElement;
