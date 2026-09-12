@@ -6,15 +6,17 @@ const homePage = document.getElementById("homePage") as HTMLElement;
 const pushPage = document.getElementById("pushPage") as HTMLElement;
 const pullPage = document.getElementById("pullPage") as HTMLElement;
 const legsPage = document.getElementById("legsPage") as HTMLElement;
+const historyPage = document.getElementById("historyPage") as HTMLElement;
 
 const choosePushButton = document.getElementById("choosePushButton") as HTMLButtonElement;
 const choosePullButton = document.getElementById("choosePullButton") as HTMLButtonElement;
 const chooseLegsButton = document.getElementById("chooseLegsButton") as HTMLButtonElement;
+const historyButton = document.getElementById("historyButton") as HTMLButtonElement;
 
 const backFromPushButton = document.getElementById("backFromPushButton") as HTMLButtonElement;
 const backFromPullButton = document.getElementById("backFromPullButton") as HTMLButtonElement;
 const backFromLegsButton = document.getElementById("backFromLegsButton") as HTMLButtonElement;
-
+const backFromHistoryButton = document.getElementById("backFromHistoryButton") as HTMLButtonElement;        
 
 // =========================
 // VISA SIDA
@@ -25,7 +27,7 @@ function showPage(page: HTMLElement): void {
     pushPage.classList.add("hidden");
     pullPage.classList.add("hidden");
     legsPage.classList.add("hidden");
-
+    historyPage.classList.add("hidden");
     page.classList.remove("hidden");
 }
 
@@ -359,7 +361,16 @@ backFromLegsButton.addEventListener("click", () => {
     showPage(homePage);
 });
 
+historyButton.addEventListener("click", () => {
 
+    showPage(historyPage);
+
+    renderHistory();
+});
+
+backFromHistoryButton.addEventListener("click", () => {
+    showPage(homePage);
+});
 // =========================
 // PUSH
 // =========================
@@ -654,42 +665,104 @@ function renderHistory(): void {
     legsHistory.innerHTML = "";
 
 
-    for (const workout of workouts.reverse()) {
-
-        const entry = document.createElement("p");
+    const sessions: any[] = [];
 
 
-        entry.textContent =
-            `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps — ${workout.date} `;
+    // Gå bakifrån så att det senaste passet kommer först
+    const reversedWorkouts = [...workouts].reverse();
 
 
-        const deleteButton =
-            document.createElement("button");
+    for (const workout of reversedWorkouts) {
 
-        deleteButton.textContent = "Radera";
-
-
-        deleteButton.addEventListener("click", () => {
-
-            deleteWorkout(workout.id);
-
-        });
+        // Nya pass har sessionId.
+        // Gamla sparningar använder kategori + datum.
+        const sessionId =
+            workout.sessionId ||
+            `${workout.category}-${workout.date}`;
 
 
-        entry.appendChild(deleteButton);
+        // Kolla om vi redan har lagt till detta pass
+        let session = sessions.find(
+            session => session.id === sessionId
+        );
 
 
-        if (workout.category === "Push") {
+        if (!session) {
 
-            pushHistory.appendChild(entry);
+            session = {
+                id: sessionId,
+                category: workout.category,
+                date: workout.date,
+                workouts: []
+            };
 
-        } else if (workout.category === "Pull") {
+            sessions.push(session);
+        }
 
-            pullHistory.appendChild(entry);
 
-        } else if (workout.category === "Legs") {
+        session.workouts.push(workout);
+    }
 
-            legsHistory.appendChild(entry);
+
+    // Visa passen
+    for (const session of sessions) {
+
+        const sessionElement =
+            document.createElement("div");
+
+        sessionElement.className = "history-session";
+
+
+        const date =
+            document.createElement("h4");
+
+        date.textContent = session.date;
+
+        sessionElement.appendChild(date);
+
+
+        for (const workout of session.workouts) {
+
+            const entry =
+                document.createElement("p");
+
+            entry.textContent =
+                `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps`;
+
+            sessionElement.appendChild(entry);
+        }
+
+
+        // Radera-knappar
+        for (const workout of session.workouts) {
+
+            const deleteButton =
+                document.createElement("button");
+
+            deleteButton.textContent = "Radera pass";
+
+            deleteButton.addEventListener("click", () => {
+
+                deleteSession(session.id);
+            });
+
+            sessionElement.appendChild(deleteButton);
+
+            break;
+        }
+
+
+        if (session.category === "Push") {
+
+            pushHistory.appendChild(sessionElement);
+
+        } else if (session.category === "Pull") {
+
+            pullHistory.appendChild(sessionElement);
+
+        } else if (session.category === "Legs") {
+
+            legsHistory.appendChild(sessionElement);
         }
     }
 }
@@ -699,23 +772,30 @@ function renderHistory(): void {
 // RADERA
 // =========================
 
-function deleteWorkout(id: string): void {
 
-    const workouts =
-        getWorkouts().filter(
-            workout => workout.id !== id
-        );
+function deleteSession(sessionId: string): void {
+
+    const workouts = getWorkouts();
+
+
+    const remainingWorkouts = workouts.filter(workout => {
+
+        const workoutSessionId =
+            workout.sessionId ||
+            `${workout.category}-${workout.date}`;
+
+        return workoutSessionId !== sessionId;
+    });
 
 
     localStorage.setItem(
         "workouts",
-        JSON.stringify(workouts)
+        JSON.stringify(remainingWorkouts)
     );
 
 
     renderHistory();
 }
-
 
 // =========================
 // START

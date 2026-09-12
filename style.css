@@ -255,3 +255,38 @@ button[type="submit"]:hover {
         min-height: 70px;
     }
 }
+
+.history-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 30px auto;
+}
+
+.history-card {
+    padding: 10px;
+    min-width: 0;
+}
+
+.history-session {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+}
+
+.history-session h4 {
+    margin-top: 0;
+}
+
+.history-session p {
+    margin: 8px 0;
+    overflow-wrap: break-word;
+}
+
+.history-session button {
+    margin-top: 10px;
+}
+

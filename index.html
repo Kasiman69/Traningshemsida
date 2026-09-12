@@ -33,6 +33,11 @@
                 <button id="chooseLegsButton">
                     Legs
                 </button>
+
+                <button id="viewHistoryButton">
+                    Historik
+                </button>
+
             </div>
 
         </section>
@@ -442,30 +447,35 @@
 
 
         <!-- HISTORIK -->
-        <section id="historySection">
+        <section id="historyPage" class="hidden">
+
+            <button id="backFromHistoryButton" class="back-button">
+            ← Tillbaka
+            </button>
 
             <h2>Historik</h2>
 
             <div class="history-container">
 
                 <div class="history-card">
-                    <h3>Push historik</h3>
+                    <h3>Push</h3>
                     <div id="pushHistory"></div>
                 </div>
 
-                <div class="history-card">
-                    <h3>Pull historik</h3>
-                    <div id="pullHistory"></div>
-                </div>
+            <div class="history-card">
+                <h3>Pull</h3>
+                <div id="pullHistory"></div>
+            </div>
 
-                <div class="history-card">
-                    <h3>Legs historik</h3>
-                    <div id="legsHistory"></div>
-                </div>
+            <div class="history-card">
+                <h3>Legs</h3>
+                <div id="legsHistory"></div>
 
             </div>
 
-        </section>
+        </div>
+
+    </section>
 
     </main>
 
