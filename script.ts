@@ -347,6 +347,13 @@ chooseLegsButton.addEventListener("click", () => {
 });
 
 
+historyButton.addEventListener("click", () => {
+
+    showPage(historyPage);
+
+    renderHistory();
+});
+
 backFromPushButton.addEventListener("click", () => {
     showPage(homePage);
 });
@@ -361,12 +368,6 @@ backFromLegsButton.addEventListener("click", () => {
     showPage(homePage);
 });
 
-historyButton.addEventListener("click", () => {
-
-    showPage(historyPage);
-
-    renderHistory();
-});
 
 backFromHistoryButton.addEventListener("click", () => {
     showPage(homePage);

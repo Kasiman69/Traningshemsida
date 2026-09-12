@@ -197,6 +197,10 @@ chooseLegsButton.addEventListener("click", () => {
     renderPreviousWorkout("Legs");
     renderActiveWorkout("Legs");
 });
+historyButton.addEventListener("click", () => {
+    showPage(historyPage);
+    renderHistory();
+});
 backFromPushButton.addEventListener("click", () => {
     showPage(homePage);
 });
@@ -205,10 +209,6 @@ backFromPullButton.addEventListener("click", () => {
 });
 backFromLegsButton.addEventListener("click", () => {
     showPage(homePage);
-});
-historyButton.addEventListener("click", () => {
-    showPage(historyPage);
-    renderHistory();
 });
 backFromHistoryButton.addEventListener("click", () => {
     showPage(homePage);
