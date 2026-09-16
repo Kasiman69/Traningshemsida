@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Min träning</title>
+
+    <link rel="manifest" href="/assets/manifest-Bx_YZnw0.json">
+  <script type="module" crossorigin src="/assets/index-DNpMZQPj.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BEiT7bAt.css">
+</head>
+
+<body>
+
+    <main>
+
+        <div id="loginPage">
+
+            <h1>Träningshemsida</h1>
+
+            <h2>Logga in</h2>
+
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="E-post"
+            >
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Lösenord"
+            >
+
+            <button id="loginButton">
+                Logga in
+            </button>
+
+            <hr>
+
+            <h2>Skapa konto</h2>
+
+            <input
+                type="email"
+                id="signupEmail"
+                placeholder="E-post"
+            >
+
+            <input
+                type="password"
+                id="signupPassword"
+                placeholder="Lösenord"
+            >
+
+            <button id="signupButton">
+                Skapa konto
+            </button>
+
+            <p id="authMessage"></p>
+
+        </div>
+
+        <!-- STARTSIDA -->
+        <section id="homePage">
+
+            <button id="logoutButton">Logga ut</button>
+
+            <h1>Min träning</h1>
+
+            <h2>Vilket pass kör du idag?</h2>
+
+            <div class="home-buttons">
+                <button id="choosePushButton">
+                    Push
+                </button>
+
+                <button id="choosePullButton">
+                    Pull
+                </button>
+
+                <button id="chooseLegsButton">
+                    Legs
+                </button>
+
+                <button id="chooseHistoryButton">
+                    Historik
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- PUSH-SIDA -->
+        <section id="pushPage" class="workout-page hidden">
+
+            <button id="backFromPushButton" class="back-button">
+                ← Tillbaka
+            </button>
+
+            <h1>Push</h1>
+
+            <div class="previous-workout">
+                <h2>Förra Push-passet</h2>
+                <div id="previousPush">
+                    <p>Inget tidigare Push-pass sparat ännu.</p>
+                </div>
+            </div>
+
+
+            <div class="workout-card push-card">
+
+                <h2>Dagens Push-pass</h2>
+
+                <div id="todayPush"></div>
+
+                <button id="finishPushButton">
+                    Avsluta Push-pass
+                </button>
+
+                <!-- Bänkpress -->
+                <div class="exercise">
+
+                    <h3>Bänkpress</h3>
+
+                    <label for="benchWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="benchWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="benchReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="benchReps"
+                        type="number"
+                    >
+
+                    <button id="benchSaveButton">
+                        Spara Bänkpress
+                    </button>
+
+                </div>
+
+
+                <!-- Axelpress -->
+                <div class="exercise">
+
+                    <h3>Axelpress</h3>
+
+                    <label for="shoulderWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="shoulderWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="shoulderReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="shoulderReps"
+                        type="number"
+                    >
+
+                    <button id="shoulderSaveButton">
+                        Spara Axelpress
+                    </button>
+
+                </div>
+
+
+                <!-- Tricep Extension -->
+                <div class="exercise">
+
+                    <h3>Overhead Tricep Extension</h3>
+
+                    <label for="tricepWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="tricepWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="tricepReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="tricepReps"
+                        type="number"
+                    >
+
+                    <button id="tricepSaveButton">
+                        Spara Tricep Extension
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PULL-SIDA -->
+        <section id="pullPage" class="workout-page hidden">
+
+            <button id="backFromPullButton" class="back-button">
+                ← Tillbaka
+            </button>
+
+            <h1>Pull</h1>
+
+            <div class="previous-workout">
+                <h2>Förra Pull-passet</h2>
+                <div id="previousPull">
+                    <p>Inget tidigare Pull-pass sparat ännu.</p>
+                </div>
+            </div>
+
+
+            <div class="workout-card pull-card">
+
+                <h2>Dagens Pull-pass</h2>
+
+                <div id="todayPull"></div>
+
+                <button id="finishPullButton">
+                    Avsluta Pull-pass
+                </button>                
+
+                <!-- Marklyft -->
+                <div class="exercise">
+
+                    <h3>Marklyft</h3>
+
+                    <label for="deadliftWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="deadliftWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="deadliftReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="deadliftReps"
+                        type="number"
+                    >
+
+                    <button id="deadliftSaveButton">
+                        Spara Marklyft
+                    </button>
+
+                </div>
+
+
+                <!-- Pullups -->
+                <div class="exercise">
+
+                    <h3>Pullups</h3>
+
+                    <label for="pullupWeight">
+                        Extra vikt (kg):
+                    </label>
+
+                    <input
+                        id="pullupWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="pullupReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="pullupReps"
+                        type="number"
+                    >
+
+                    <button id="pullupSaveButton">
+                        Spara Pullups
+                    </button>
+
+                </div>
+
+
+                <!-- Biceps Curl -->
+                <div class="exercise">
+
+                    <h3>Biceps Curl</h3>
+
+                    <label for="curlWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="curlWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="curlReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="curlReps"
+                        type="number"
+                    >
+
+                    <button id="curlSaveButton">
+                        Spara Biceps Curl
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LEGS-SIDA -->
+        <section id="legsPage" class="workout-page hidden">
+
+            <button id="backFromLegsButton" class="back-button">
+                ← Tillbaka
+            </button>
+
+            <h1>Legs</h1>
+
+            <div class="previous-workout">
+                <h2>Förra Legs-passet</h2>
+                <div id="previousLegs">
+                    <p>Inget tidigare Legs-pass sparat ännu.</p>
+                </div>
+            </div>
+
+
+            <div class="workout-card legs-card">
+
+                <h2>Dagens Legs-pass</h2>
+
+                <div id="todayLegs"></div>
+
+                <button id="finishLegsButton">
+                    Avsluta Legs-pass
+                </button>
+
+                <!-- Squat -->
+                <div class="exercise">
+
+                    <h3>Squat</h3>
+
+                    <label for="squatWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="squatWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="squatReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="squatReps"
+                        type="number"
+                    >
+
+                    <button id="squatSaveButton">
+                        Spara Squat
+                    </button>
+
+                </div>
+
+
+                <!-- Leg Extension -->
+                <div class="exercise">
+
+                    <h3>Leg Extension</h3>
+
+                    <label for="legExtensionWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="legExtensionWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="legExtensionReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="legExtensionReps"
+                        type="number"
+                    >
+
+                    <button id="legExtensionSaveButton">
+                        Spara Leg Extension
+                    </button>
+
+                </div>
+
+
+                <!-- Leg Curl -->
+                <div class="exercise">
+
+                    <h3>Leg Curl</h3>
+
+                    <label for="legCurlWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="legCurlWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="legCurlReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="legCurlReps"
+                        type="number"
+                    >
+
+                    <button id="legCurlSaveButton">
+                        Spara Leg Curl
+                    </button>
+
+                </div>
+
+
+                <!-- Calf Raise -->
+                <div class="exercise">
+
+                    <h3>Calf Raise</h3>
+
+                    <label for="calfRaiseWeight">
+                        Vikt (kg):
+                    </label>
+
+                    <input
+                        id="calfRaiseWeight"
+                        type="number"
+                        step="0.5"
+                    >
+
+                    <label for="calfRaiseReps">
+                        Reps:
+                    </label>
+
+                    <input
+                        id="calfRaiseReps"
+                        type="number"
+                    >
+
+                    <button id="calfRaiseSaveButton">
+                        Spara Calf Raise
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- HISTORIK-SIDA -->
+
+        <section id="historyPage" class="hidden">
+
+            <button id="backFromHistoryButton" class="back-button">
+                ← Tillbaka
+            </button>
+
+            <h2>Historik</h2>
+
+            <div class="history-container">
+
+                <div class="history-card">
+                    <h3>Push</h3>
+                    <div id="pushHistory"></div>
+                </div>
+
+                <div class="history-card">
+                    <h3>Pull</h3>
+                    <div id="pullHistory"></div>
+                </div>
+
+                <div class="history-card">
+                    <h3>Legs</h3>
+                    <div id="legsHistory"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+</body>
+</html>
