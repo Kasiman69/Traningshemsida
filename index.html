@@ -14,8 +14,56 @@
 
     <main>
 
+        <div id="loginPage">
+
+            <h1>Träningshemsida</h1>
+
+            <h2>Logga in</h2>
+
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="E-post"
+            >
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Lösenord"
+            >
+
+            <button id="loginButton">
+                Logga in
+            </button>
+
+            <hr>
+
+            <h2>Skapa konto</h2>
+
+            <input
+                type="email"
+                id="signupEmail"
+                placeholder="E-post"
+            >
+
+            <input
+                type="password"
+                id="signupPassword"
+                placeholder="Lösenord"
+            >
+
+            <button id="signupButton">
+                Skapa konto
+            </button>
+
+            <p id="authMessage"></p>
+
+        </div>
+
         <!-- STARTSIDA -->
         <section id="homePage">
+
+            <button id="logoutButton">Logga ut</button>
 
             <h1>Min träning</h1>
 
@@ -480,7 +528,7 @@
     </main>
 
 
-    <script src="./dist/script.js"></script>
+    <script type="module" src="/script.ts"></script>
 
 </body>
 </html>

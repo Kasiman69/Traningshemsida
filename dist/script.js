@@ -1,7 +1,7 @@
-"use strict";
 // =========================
 // SIDNAVIGATION
 // =========================
+import { supabase } from "./supabase.js";
 const homePage = document.getElementById("homePage");
 const pushPage = document.getElementById("pushPage");
 const pullPage = document.getElementById("pullPage");
@@ -151,6 +151,39 @@ function saveWorkout(category, exercise, weight, reps) {
     localStorage.setItem("activeWorkout", JSON.stringify(activeWorkout));
     // Visa dagens pass
     renderActiveWorkout(category);
+}
+async function saveWorkoutToSupabase(category, exercise, weight, reps) {
+    const { data: { user }, } = await supabase.auth.getUser();
+    if (!user) {
+        console.error("Ingen användare är inloggad");
+        return;
+    }
+    const { data, error } = await supabase
+        .from("workouts")
+        .insert({
+        user_id: user.id,
+        category: category,
+        exercise: exercise,
+        weight: weight,
+        reps: reps,
+    })
+        .select();
+    if (error) {
+        console.error("Kunde inte spara träningspass:", error);
+        return;
+    }
+    console.log("Träningspass sparat i Supabase:", data);
+}
+async function loginTestUser() {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: "test@example.com",
+        password: "GPo5dUNVW8b:_8Me8j",
+    });
+    if (error) {
+        console.error("Inloggning misslyckades:", error);
+        return;
+    }
+    console.log("Inloggad användare:", data.user);
 }
 // =========================
 // AVSLUTA PASS
@@ -390,3 +423,4 @@ function deleteSession(sessionId) {
 // START
 // =========================
 renderHistory();
+loginTestUser();

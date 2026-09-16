@@ -290,3 +290,33 @@ button[type="submit"]:hover {
     margin-top: 10px;
 }
 
+#loginPage {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 20px;
+
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+#loginPage h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+}
+
+#loginPage h2 {
+    margin-top: 25px;
+}
+
+#loginPage hr {
+    border: none;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    margin: 30px 0;
+}
+
+#loginPage p {
+    text-align: center;
+}

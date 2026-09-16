@@ -2,6 +2,10 @@
 // SIDNAVIGATION
 // =========================
 
+import { supabase } from "./supabase.js";
+
+
+
 const homePage = document.getElementById("homePage") as HTMLElement;
 const pushPage = document.getElementById("pushPage") as HTMLElement;
 const pullPage = document.getElementById("pullPage") as HTMLElement;
@@ -19,10 +23,107 @@ const backFromLegsButton = document.getElementById("backFromLegsButton") as HTML
 const backFromHistoryButton = document.getElementById("backFromHistoryButton") as HTMLButtonElement;        
 
 // =========================
+// LOGIN / SKAPA KONTO
+// =========================
+
+const loginPage =
+    document.getElementById("loginPage") as HTMLElement;
+
+const loginEmail =
+    document.getElementById("loginEmail") as HTMLInputElement;
+
+const loginPassword =
+    document.getElementById("loginPassword") as HTMLInputElement;
+
+const loginButton =
+    document.getElementById("loginButton") as HTMLButtonElement;
+
+const signupEmail =
+    document.getElementById("signupEmail") as HTMLInputElement;
+
+const signupPassword =
+    document.getElementById("signupPassword") as HTMLInputElement;
+
+const signupButton =
+    document.getElementById("signupButton") as HTMLButtonElement;
+
+const authMessage =
+    document.getElementById("authMessage") as HTMLParagraphElement;
+
+
+// =========================
+// LOGGA IN
+// =========================
+
+loginButton.addEventListener("click", async () => {
+
+    const email = loginEmail.value;
+    const password = loginPassword.value;
+
+    const { data, error } =
+        await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+    if (error) {
+
+        authMessage.textContent =
+            "Fel e-post eller lösenord.";
+
+        console.error("Inloggning misslyckades:", error);
+
+        return;
+    }
+
+    console.log("Inloggad användare:", data.user);
+
+    // Dölj login
+    loginPage.classList.add("hidden");
+
+    // Visa hemsidan
+    showPage(homePage);
+});
+
+
+// =========================
+// SKAPA KONTO
+// =========================
+
+signupButton.addEventListener("click", async () => {
+
+    const email = signupEmail.value;
+    const password = signupPassword.value;
+
+    const { data, error } =
+        await supabase.auth.signUp({
+            email: email,
+            password: password
+        });
+
+    if (error) {
+
+        authMessage.textContent =
+            error.message;
+
+        console.error("Kunde inte skapa konto:", error);
+
+        return;
+    }
+
+    console.log("Konto skapat:", data.user);
+
+    authMessage.textContent =
+        "Kontot har skapats! Du kan nu logga in.";
+});
+
+// =========================
 // VISA SIDA
 // =========================
 
 function showPage(page: HTMLElement): void {
+
+    loginPage.classList.add("hidden");
     homePage.classList.add("hidden");
     pushPage.classList.add("hidden");
     pullPage.classList.add("hidden");
@@ -54,9 +155,9 @@ function getActiveWorkout() {
 // VISA FÖREGÅENDE PASS
 // =========================
 
-function renderPreviousWorkout(category: string): void {
+async function renderPreviousWorkout(category: string): Promise<void> {
 
-    const workouts = getWorkouts();
+    const workouts = await getWorkoutsFromSupabase();
 
     const categoryWorkouts = workouts.filter(
         workout => workout.category === category
@@ -66,14 +167,17 @@ function renderPreviousWorkout(category: string): void {
     let previousWorkoutElement: HTMLElement;
 
     if (category === "Push") {
+
         previousWorkoutElement =
             document.getElementById("previousPush") as HTMLElement;
 
     } else if (category === "Pull") {
+
         previousWorkoutElement =
             document.getElementById("previousPull") as HTMLElement;
 
     } else {
+
         previousWorkoutElement =
             document.getElementById("previousLegs") as HTMLElement;
     }
@@ -91,28 +195,17 @@ function renderPreviousWorkout(category: string): void {
     }
 
 
-    // Hitta det senaste färdiga passet
-    const lastWorkout = categoryWorkouts[categoryWorkouts.length - 1];
+    // Hitta det senaste setet
+    const lastWorkout = categoryWorkouts[0];
 
 
-    let previousWorkout;
-
-
-    // Nya pass har ett sessionId
-    if (lastWorkout.sessionId) {
-
-        previousWorkout = categoryWorkouts.filter(
-            workout => workout.sessionId === lastWorkout.sessionId
-        );
-
-    } else {
-
-        // Gamla träningsdata utan sessionId
-        // grupperas efter datum
-        previousWorkout = categoryWorkouts.filter(
-            workout => workout.date === lastWorkout.date
-        );
-    }
+    // Hitta alla set från samma pass.
+    // Just nu använder vi kategori + datum.
+    const previousWorkout = categoryWorkouts.filter(
+        workout =>
+            workout.category === lastWorkout.category &&
+            workout.date === lastWorkout.date
+    );
 
 
     for (const workout of previousWorkout) {
@@ -196,7 +289,7 @@ function renderActiveWorkout(category: string): void {
 // SPARA SET
 // =========================
 
-function saveWorkout(
+async function saveWorkout(
     category: string,
     exercise: string,
     weight: string,
@@ -251,10 +344,19 @@ function saveWorkout(
     activeWorkout.workouts.push(workout);
 
 
-    // Spara det pågående passet
+    // Spara det pågående passet lokalt
     localStorage.setItem(
         "activeWorkout",
         JSON.stringify(activeWorkout)
+    );
+
+
+    // Spara setet i Supabase
+    await saveWorkoutToSupabase(
+        category,
+        exercise,
+        Number(weight),
+        Number(reps)
     );
 
 
@@ -262,87 +364,135 @@ function saveWorkout(
     renderActiveWorkout(category);
 }
 
+async function saveWorkoutToSupabase(
+  category: string,
+  exercise: string,
+  weight: number,
+  reps: number
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    console.error("Ingen användare är inloggad");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("workouts")
+    .insert({
+      user_id: user.id,
+      category: category,
+      exercise: exercise,
+      weight: weight,
+      reps: reps,
+    })
+    .select();
+
+  if (error) {
+    console.error("Kunde inte spara träningspass:", error);
+    return;
+  }
+
+  console.log("Träningspass sparat i Supabase:", data);
+}
+
+async function loginTestUser() {
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email: "pohnerisak@gmail.com",
+      password: "GPo5dUNVW8b:_8Me8j",
+    });
+
+  if (error) {
+    console.error("Inloggning misslyckades:", error);
+    return;
+  }
+
+  console.log("Inloggad användare:", data.user);
+}
+
+async function getWorkoutsFromSupabase() {
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        console.error("Ingen användare är inloggad");
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from("workouts")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Kunde inte hämta träningshistorik:", error);
+        return [];
+    }
+
+    console.log("Träningshistorik från Supabase:", data);
+
+    return data;
+}
 
 // =========================
 // AVSLUTA PASS
 // =========================
 
-function finishWorkout(category: string): void {
+async function finishWorkout(category: string): Promise<void> {
 
     const activeWorkout = getActiveWorkout();
-
 
     if (
         !activeWorkout ||
         activeWorkout.category !== category ||
         activeWorkout.workouts.length === 0
     ) {
-
         alert("Du har inga sparade set i detta pass ännu.");
-
         return;
     }
 
-
-    // Hämta tidigare färdiga pass
-    const savedWorkouts = getWorkouts();
-
-
-    // Lägg dagens alla set bland de färdiga passen
-    for (const workout of activeWorkout.workouts) {
-
-        savedWorkouts.push(workout);
-    }
-
-
-    // Spara den nya historiken
-    localStorage.setItem(
-        "workouts",
-        JSON.stringify(savedWorkouts)
-    );
-
-
-    // Ta bort det pågående passet
+    // Ta bort det pågående passet från localStorage
     localStorage.removeItem("activeWorkout");
 
-
-    // Uppdatera allt
-    renderPreviousWorkout(category);
+    // Uppdatera sidan
     renderActiveWorkout(category);
-    renderHistory();
-
+    await renderHistory();
 
     alert("Passet är avslutat och sparat!");
 }
-
 
 // =========================
 // PUSH / PULL / LEGS NAVIGATION
 // =========================
 
-choosePushButton.addEventListener("click", () => {
+choosePushButton.addEventListener("click", async () => {
 
     showPage(pushPage);
 
-    renderPreviousWorkout("Push");
+    await renderPreviousWorkout("Push");
     renderActiveWorkout("Push");
 });
 
 
-choosePullButton.addEventListener("click", () => {
+choosePullButton.addEventListener("click", async () => {
 
     showPage(pullPage);
 
-    renderPreviousWorkout("Pull");
+    await renderPreviousWorkout("Pull");
     renderActiveWorkout("Pull");
 });
 
 
-chooseLegsButton.addEventListener("click", () => {
+chooseLegsButton.addEventListener("click", async () => {
 
     showPage(legsPage);
 
-    renderPreviousWorkout("Legs");
+    await renderPreviousWorkout("Legs");
     renderActiveWorkout("Legs");
 });
 
@@ -647,9 +797,9 @@ finishLegsButton.addEventListener("click", () => {
 // HISTORIK
 // =========================
 
-function renderHistory(): void {
+async function renderHistory(): Promise<void> {
 
-    const workouts = getWorkouts();
+    const workouts = await getWorkoutsFromSupabase();
 
     const pushHistory =
         document.getElementById("pushHistory") as HTMLDivElement;
@@ -675,8 +825,8 @@ function renderHistory(): void {
 
     for (const workout of reversedWorkouts) {
 
-        // Nya pass har sessionId.
-        // Gamla sparningar använder kategori + datum.
+        // Supabase har inte sessionId ännu.
+        // Därför grupperar vi tills vidare på kategori + datum.
         const sessionId =
             workout.sessionId ||
             `${workout.category}-${workout.date}`;
@@ -734,7 +884,7 @@ function renderHistory(): void {
         }
 
 
-        // Radera-knappar
+        // Radera-knapp
         for (const workout of session.workouts) {
 
             const deleteButton =
@@ -744,7 +894,10 @@ function renderHistory(): void {
 
             deleteButton.addEventListener("click", () => {
 
-                deleteSession(session.id);
+                deleteSession(
+                    session.category,
+                    session.date
+                );
             });
 
             sessionElement.appendChild(deleteButton);
@@ -774,32 +927,116 @@ function renderHistory(): void {
 // =========================
 
 
-function deleteSession(sessionId: string): void {
+async function deleteSessionFromSupabase(
+    category: string,
+    date: string
+): Promise<void> {
 
-    const workouts = getWorkouts();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
+    if (!user) {
+        console.error("Ingen användare är inloggad");
+        return;
+    }
 
-    const remainingWorkouts = workouts.filter(workout => {
+    const { error } = await supabase
+        .from("workouts")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("category", category)
+        .eq("date", date);
 
-        const workoutSessionId =
-            workout.sessionId ||
-            `${workout.category}-${workout.date}`;
+    if (error) {
+        console.error("Kunde inte radera pass:", error);
+        return;
+    }
 
-        return workoutSessionId !== sessionId;
-    });
+    console.log("Pass raderat från Supabase");
 
-
-    localStorage.setItem(
-        "workouts",
-        JSON.stringify(remainingWorkouts)
-    );
-
-
-    renderHistory();
+    await renderHistory();
 }
 
+async function deleteSession(
+    category: string,
+    date: string
+): Promise<void> {
+
+    await deleteSessionFromSupabase(category, date);
+}
+
+
 // =========================
-// START
+// KONTROLLERA INLOGGNING
 // =========================
 
-renderHistory();
+async function checkLogin(): Promise<void> {
+
+    const {
+        data: { session }
+    } = await supabase.auth.getSession();
+
+    if (session) {
+
+        // Användaren är redan inloggad
+        loginPage.classList.add("hidden");
+
+        showPage(homePage);
+
+        console.log(
+            "Redan inloggad:",
+            session.user.email
+        );
+
+    } else {
+
+        // Ingen användare är inloggad
+        loginPage.classList.remove("hidden");
+
+        homePage.classList.add("hidden");
+        pushPage.classList.add("hidden");
+        pullPage.classList.add("hidden");
+        legsPage.classList.add("hidden");
+        historyPage.classList.add("hidden");
+    }
+}
+
+const logoutButton =
+    document.getElementById("logoutButton") as HTMLButtonElement;
+
+
+// =========================
+// LOGGA UT
+// =========================
+
+logoutButton.addEventListener("click", async () => {
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+        console.error("Kunde inte logga ut:", error);
+        return;
+    }
+
+    // Dölj alla träningssidor
+    homePage.classList.add("hidden");
+    pushPage.classList.add("hidden");
+    pullPage.classList.add("hidden");
+    legsPage.classList.add("hidden");
+    historyPage.classList.add("hidden");
+
+    // Visa login
+    loginPage.classList.remove("hidden");
+
+    // Töm login-fälten
+    loginEmail.value = "";
+    loginPassword.value = "";
+
+    console.log("Utloggad");
+});
+
+checkLogin();
+
+
+
