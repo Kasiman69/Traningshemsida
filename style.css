@@ -320,3 +320,42 @@ button[type="submit"]:hover {
 #loginPage p {
     text-align: center;
 }
+
+/* Egna träningspass */
+#customWorkoutTrainingPage {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Samma styling som sparade träningspass */
+#customWorkoutTrainingPage .previous-workout {
+    margin: 25px 0;
+    padding: 20px;
+
+    background: rgba(15, 23, 42, 0.9);
+    border-radius: 15px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Samma styling som vanliga sparade set */
+#customWorkoutTrainingPage .saved-set {
+    margin: 10px 0;
+    padding: 12px;
+
+    background: #1e293b;
+    border-left: 4px solid #64748b;
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+/* Övningarna */
+#customWorkoutTrainingPage .exercise {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Avsluta-knappen använder den vanliga button-stylingen */
+#finishCustomWorkoutButton {
+    margin-top: 25px;
+}

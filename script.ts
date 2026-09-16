@@ -11,17 +11,29 @@ const pushPage = document.getElementById("pushPage") as HTMLElement;
 const pullPage = document.getElementById("pullPage") as HTMLElement;
 const legsPage = document.getElementById("legsPage") as HTMLElement;
 const historyPage = document.getElementById("historyPage") as HTMLElement;
+const customWorkoutPage = document.getElementById("customWorkoutPage") as HTMLElement;
+const customWorkoutTrainingPage = document.getElementById("customWorkoutTrainingPage") as HTMLElement;
 
 const choosePushButton = document.getElementById("choosePushButton") as HTMLButtonElement;
 const choosePullButton = document.getElementById("choosePullButton") as HTMLButtonElement;
 const chooseLegsButton = document.getElementById("chooseLegsButton") as HTMLButtonElement;
 const historyButton = document.getElementById("chooseHistoryButton") as HTMLButtonElement;
+const customWorkoutButton = document.getElementById("customWorkoutButton") as HTMLButtonElement;
 
 const backFromPushButton = document.getElementById("backFromPushButton") as HTMLButtonElement;
 const backFromPullButton = document.getElementById("backFromPullButton") as HTMLButtonElement;
 const backFromLegsButton = document.getElementById("backFromLegsButton") as HTMLButtonElement;
 const backFromHistoryButton = document.getElementById("backFromHistoryButton") as HTMLButtonElement;        
+const backFromCustomWorkoutButton = document.getElementById("backFromCustomWorkoutButton") as HTMLButtonElement;
+const backFromCustomTrainingButton = document.getElementById("backFromCustomTrainingButton") as HTMLButtonElement;
 
+let currentCustomWorkoutSessionId: string | null = null;
+let currentCustomWorkoutId: string | null = null;
+
+const finishCustomWorkoutButton = document.getElementById("finishCustomWorkoutButton") as HTMLButtonElement;
+
+const customTrainingTitle = document.getElementById("customTrainingTitle") as HTMLHeadingElement;
+const customTrainingExercises = document.getElementById("customTrainingExercises") as HTMLDivElement;
 // =========================
 // LOGIN / SKAPA KONTO
 // =========================
@@ -49,7 +61,6 @@ const signupButton =
 
 const authMessage =
     document.getElementById("authMessage") as HTMLParagraphElement;
-
 
 // =========================
 // LOGGA IN
@@ -129,25 +140,716 @@ function showPage(page: HTMLElement): void {
     pullPage.classList.add("hidden");
     legsPage.classList.add("hidden");
     historyPage.classList.add("hidden");
+    customWorkoutTrainingPage.classList.add("hidden");
+    
+    customWorkoutPage.style.display = "none";
+
     page.classList.remove("hidden");
+
+    if (page === customWorkoutPage) {
+        customWorkoutPage.style.display = "block";
+    }
 }
 
+// =========================
+// EGET TRÄNINGSPASS
+// =========================
+
+const addCustomExerciseButton =
+    document.getElementById("addCustomExerciseButton") as HTMLButtonElement;
+
+const customExercises =
+    document.getElementById("customExercises") as HTMLDivElement;
+
+
+// Lägg till en övning
+addCustomExerciseButton.addEventListener("click", () => {
+
+    const exerciseContainer = document.createElement("div");
+
+    exerciseContainer.className = "custom-exercise";
+
+    const exerciseInput = document.createElement("input");
+
+    exerciseInput.type = "text";
+    exerciseInput.placeholder = "Namn på övning";
+
+    const removeButton = document.createElement("button");
+
+    removeButton.textContent = "Ta bort";
+
+    removeButton.addEventListener("click", () => {
+        exerciseContainer.remove();
+    });
+
+    exerciseContainer.appendChild(exerciseInput);
+    exerciseContainer.appendChild(removeButton);
+
+    customExercises.appendChild(exerciseContainer);
+});
 
 // =========================
-// DATA
+// SPARA EGET TRÄNINGSPASS
 // =========================
 
-function getWorkouts() {
-    return JSON.parse(
-        localStorage.getItem("workouts") || "[]"
+const customWorkoutName =
+    document.getElementById("customWorkoutName") as HTMLInputElement;
+
+const saveCustomWorkoutButton =
+    document.getElementById("saveCustomWorkoutButton") as HTMLButtonElement;
+
+
+saveCustomWorkoutButton.addEventListener("click", async () => {
+
+    const workoutName = customWorkoutName.value.trim();
+
+    const customWorkoutCategory =
+        document.getElementById("customWorkoutCategory") as HTMLSelectElement;
+
+    const category = customWorkoutCategory.value;
+
+    if (!workoutName) {
+        alert("Skriv ett namn på träningspasset.");
+        return;
+    }
+
+
+    // Hämta alla övningar
+    const exerciseInputs =
+        customExercises.querySelectorAll("input");
+
+
+    const exercises: string[] = [];
+
+    for (const input of exerciseInputs) {
+
+        const exerciseName = input.value.trim();
+
+        if (exerciseName) {
+            exercises.push(exerciseName);
+        }
+    }
+
+
+    if (exercises.length === 0) {
+        alert("Lägg till minst en övning.");
+        return;
+    }
+
+
+    // Hämta inloggad användare
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+
+    if (!user) {
+        alert("Du måste vara inloggad.");
+        return;
+    }
+
+
+    // Spara träningspasset i Supabase
+    const { data, error } = await supabase
+        .from("custom_workouts")
+        .insert({
+            user_id: user.id,
+            name: workoutName,
+            category: category,
+            exercises: exercises
+        })
+        .select();
+
+
+    if (error) {
+
+        console.error(
+            "Kunde inte spara träningspass:",
+            error
+        );
+
+        alert("Kunde inte spara träningspasset.");
+
+        return;
+    }
+
+
+    console.log(
+        "Eget träningspass sparat:",
+        data
     );
+
+
+    alert("Träningspasset har sparats!");
+
+    await renderCustomWorkouts();
+
+    // Rensa formuläret
+    customWorkoutName.value = "";
+    customExercises.innerHTML = "";
+});
+
+// =========================
+// VISA EGNA TRÄNINGSPASS
+// =========================
+
+const savedCustomWorkouts =
+    document.getElementById("savedCustomWorkouts") as HTMLDivElement;
+
+
+async function renderCustomWorkouts(): Promise<void> {
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return;
+    }
+
+
+    const { data, error } = await supabase
+        .from("custom_workouts")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+
+    if (error) {
+
+        console.error(
+            "Kunde inte hämta egna träningspass:",
+            error
+        );
+
+        return;
+    }
+
+
+    savedCustomWorkouts.innerHTML = "";
+
+
+    for (const workout of data) {
+
+        const button =
+            document.createElement("button");
+
+        button.textContent = workout.name;
+
+        button.addEventListener("click", () => {
+
+            openCustomWorkout(workout);
+
+        });
+
+        savedCustomWorkouts.appendChild(button);
+    }
 }
 
+/* Öppna ett eget träningspass */
+async function openCustomWorkout(workout: any): Promise<void> {
+    showPage(customWorkoutTrainingPage);
 
-function getActiveWorkout() {
-    return JSON.parse(
-        localStorage.getItem("activeWorkout") || "null"
+    customTrainingTitle.textContent = workout.name;
+
+    // Rensa gamla övningar
+    customTrainingExercises.innerHTML = "";
+
+    const {
+        data: { user },
+        error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        alert("Du måste vara inloggad.");
+        return;
+    }
+
+    // Ingen session skapas när passet öppnas.
+    // Den skapas först när första setet sparas.
+    currentCustomWorkoutSessionId = null;
+    currentCustomWorkoutId = workout.id;
+
+
+    /* =========================================
+       FÖRRA PASSET
+       ========================================= */
+
+    const previousWorkoutContainer =
+        document.getElementById(
+            "customPreviousWorkout"
+        ) as HTMLDivElement;
+
+    previousWorkoutContainer.innerHTML = "";
+
+
+    // Hämta senaste avslutade sessionen
+    const {
+        data: previousSession,
+        error: previousSessionError
+    } = await supabase
+        .from("custom_workout_sessions")
+        .select("id, completed_at")
+        .eq("custom_workout_id", workout.id)
+        .eq("user_id", user.id)
+        .not("completed_at", "is", null)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+
+    if (previousSessionError) {
+        console.error(
+            "Kunde inte hämta förra passet:",
+            previousSessionError
+        );
+    }
+
+
+    let previousExercises: any[] = [];
+
+
+    if (previousSession) {
+
+        const {
+            data: previousData,
+            error: previousExercisesError
+        } = await supabase
+            .from("custom_workout_exercises")
+            .select("*")
+            .eq(
+                "workout_id",
+                previousSession.id
+            )
+            .order("position", {
+                ascending: true
+            });
+
+
+        if (previousExercisesError) {
+
+            console.error(
+                "Kunde inte hämta övningar från förra passet:",
+                previousExercisesError
+            );
+
+        } else {
+
+            previousExercises =
+                previousData || [];
+
+        }
+    }
+
+
+    if (previousExercises.length === 0) {
+
+        const noPreviousText =
+            document.createElement("p");
+
+        noPreviousText.textContent =
+            "Inget tidigare pass sparat ännu.";
+
+        previousWorkoutContainer.appendChild(
+            noPreviousText
+        );
+
+    } else {
+
+        for (
+            const previousExercise
+            of previousExercises
+        ) {
+
+            const entry =
+                document.createElement("p");
+
+            entry.textContent =
+                `${previousExercise.exercise}: ` +
+                `${previousExercise.weight} kg × ` +
+                `${previousExercise.reps} reps`;
+
+            previousWorkoutContainer.appendChild(
+                entry
+            );
+        }
+    }
+
+
+    /* =========================================
+       DAGENS SPARADE SET
+       ========================================= */
+
+    const todaySetsList =
+        document.getElementById(
+            "todayCustomSets"
+        ) as HTMLDivElement;
+
+    todaySetsList.innerHTML =
+        "<p>Inga set sparade ännu.</p>";
+
+
+    /*
+     * Vi använder samma typ av sparad-rad
+     * som resten av hemsidan.
+     */
+    const addTodaySet = (
+        exercise: string,
+        weight: number,
+        reps: number
+    ) => {
+
+        // Om standardtexten finns kvar,
+        // ta bort den först.
+        const emptyText =
+            todaySetsList.querySelector(
+                ".empty-set-message"
+            );
+
+        if (emptyText) {
+            emptyText.remove();
+        }
+
+        const entry =
+            document.createElement("p");
+
+        entry.className =
+            "saved-set";
+
+        entry.textContent =
+            `${exercise}: ` +
+            `${weight} kg × ` +
+            `${reps} reps`;
+
+        todaySetsList.appendChild(entry);
+    };
+
+
+    // Byt ut standardtexten mot en klass
+    // så att vi enkelt kan ta bort den.
+    todaySetsList.innerHTML = "";
+
+    const emptyText =
+        document.createElement("p");
+
+    emptyText.className =
+        "empty-set-message";
+
+    emptyText.textContent =
+        "Inga set sparade ännu.";
+
+    todaySetsList.appendChild(
+        emptyText
     );
+
+
+    /* =========================================
+       DAGENS ÖVNINGAR
+       ========================================= */
+
+    for (
+        let i = 0;
+        i < workout.exercises.length;
+        i++
+    ) {
+
+        const exercise =
+            workout.exercises[i];
+
+
+        const exerciseContainer =
+            document.createElement("div");
+
+        exerciseContainer.className =
+            "exercise";
+
+
+        const title =
+            document.createElement("h3");
+
+        title.textContent =
+            exercise;
+
+
+        const weightLabel =
+            document.createElement("label");
+
+        weightLabel.textContent =
+            "Vikt (kg):";
+
+
+        const weightInput =
+            document.createElement("input");
+
+        weightInput.type =
+            "number";
+
+        weightInput.step =
+            "0.5";
+
+        weightInput.placeholder =
+            "Vikt";
+
+
+        const repsLabel =
+            document.createElement("label");
+
+        repsLabel.textContent =
+            "Reps:";
+
+
+        const repsInput =
+            document.createElement("input");
+
+        repsInput.type =
+            "number";
+
+        repsInput.placeholder =
+            "Reps";
+
+
+        const saveSetButton =
+            document.createElement("button");
+
+        saveSetButton.textContent =
+            "Spara set";
+
+
+        /* =====================================
+           SPARA SET
+           ===================================== */
+
+        saveSetButton.addEventListener(
+            "click",
+            async () => {
+
+                if (!currentCustomWorkoutId) {
+
+                    alert(
+                        "Inget aktivt träningspass."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    !weightInput.value ||
+                    !repsInput.value
+                ) {
+
+                    alert(
+                        "Fyll i vikt och reps."
+                    );
+
+                    return;
+                }
+
+
+                const weight =
+                    Number(
+                        weightInput.value
+                    );
+
+                const reps =
+                    Number(
+                        repsInput.value
+                    );
+
+
+                if (
+                    weight <= 0 ||
+                    reps <= 0
+                ) {
+
+                    alert(
+                        "Vikt och reps måste vara större än 0."
+                    );
+
+                    return;
+                }
+
+
+                /* =================================
+                   SKAPA SESSION VID FÖRSTA SETET
+                   ================================= */
+
+                if (
+                    !currentCustomWorkoutSessionId
+                ) {
+
+                    const {
+                        data: session,
+                        error: sessionError
+                    } = await supabase
+                        .from(
+                            "custom_workout_sessions"
+                        )
+                        .insert({
+                            custom_workout_id:
+                                currentCustomWorkoutId,
+
+                            user_id:
+                                user.id
+                        })
+                        .select()
+                        .single();
+
+
+                    if (
+                        sessionError ||
+                        !session
+                    ) {
+
+                        console.error(
+                            "Kunde inte skapa träningssession:",
+                            sessionError
+                        );
+
+                        alert(
+                            "Kunde inte starta träningspasset."
+                        );
+
+                        return;
+                    }
+
+
+                    currentCustomWorkoutSessionId =
+                        session.id;
+                }
+
+
+                /* =================================
+                   SPARA SETET
+                   ================================= */
+
+                const {
+                    data: savedSet,
+                    error: saveError
+                } = await supabase
+                    .from(
+                        "custom_workout_exercises"
+                    )
+                    .insert({
+                        workout_id:
+                            currentCustomWorkoutSessionId,
+
+                        exercise:
+                            exercise,
+
+                        position:
+                            i + 1,
+
+                        user_id:
+                            user.id,
+
+                        weight:
+                            weight,
+
+                        reps:
+                            reps
+                    })
+                    .select()
+                    .single();
+
+
+                if (saveError) {
+
+                    console.error(
+                        "Kunde inte spara set:",
+                        JSON.stringify(
+                            saveError,
+                            null,
+                            2
+                        )
+                    );
+
+                    alert(
+                        "Kunde inte spara setet."
+                    );
+
+                    return;
+                }
+
+
+                /* =================================
+                   VISA SETET UNDER
+                   "DAGENS SPARADE SET"
+                   ================================= */
+
+                const emptyMessage =
+                    todaySetsList.querySelector(
+                        ".empty-set-message"
+                    );
+
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+
+
+                const setText =
+                    document.createElement("p");
+
+                setText.className =
+                    "saved-set";
+
+                setText.textContent =
+                    `${savedSet.exercise}: ` +
+                    `${savedSet.weight} kg × ` +
+                    `${savedSet.reps} reps`;
+
+
+                todaySetsList.appendChild(
+                    setText
+                );
+
+
+                // Töm inputfälten efter sparning
+                weightInput.value = "";
+                repsInput.value = "";
+
+
+                console.log(
+                    "Set sparat:",
+                    savedSet
+                );
+            }
+        );
+
+
+        /* =================================
+           BYGG ÖVNINGEN
+           ================================= */
+
+        exerciseContainer.appendChild(
+            title
+        );
+
+        exerciseContainer.appendChild(
+            weightLabel
+        );
+
+        exerciseContainer.appendChild(
+            weightInput
+        );
+
+        exerciseContainer.appendChild(
+            repsLabel
+        );
+
+        exerciseContainer.appendChild(
+            repsInput
+        );
+
+        exerciseContainer.appendChild(
+            saveSetButton
+        );
+
+
+        customTrainingExercises.appendChild(
+            exerciseContainer
+        );
+    }
 }
 
 
@@ -289,6 +991,12 @@ function renderActiveWorkout(category: string): void {
 // SPARA SET
 // =========================
 
+function getActiveWorkout() {
+    return JSON.parse(
+        localStorage.getItem("activeWorkout") || "null"
+    );
+}
+
 async function saveWorkout(
     category: string,
     exercise: string,
@@ -364,6 +1072,59 @@ async function saveWorkout(
     renderActiveWorkout(category);
 }
 
+async function saveCustomWorkoutEntry(
+    customWorkoutId: number,
+    exercise: string,
+    weight: number,
+    reps: number
+): Promise<void> {
+
+    const {
+        data: { user },
+        error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        console.error("Ingen inloggad användare:", userError);
+        alert("Du måste vara inloggad.");
+        return;
+    }
+
+    console.log("SAVE CUSTOM WORKOUT:", {
+        customWorkoutId,
+        exercise,
+        weight,
+        reps,
+        userId: user.id
+    });
+
+    const { data, error } = await supabase
+        .from("custom_workout_exercises")
+        .insert({
+            workout_id: customWorkoutId,
+            user_id: user.id,
+            exercise: exercise,
+            weight: weight,
+            reps: reps,
+            position: 1
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error(
+            "Kunde inte spara eget träningspass:",
+            JSON.stringify(error, null, 2)
+        );
+        alert("Kunde inte spara träningspasset.");
+        return;
+    }
+
+    console.log("Övning sparad:", data);
+
+    await renderCustomWorkouts();
+}
+
 async function saveWorkoutToSupabase(
   category: string,
   exercise: string,
@@ -423,20 +1184,80 @@ async function getWorkoutsFromSupabase() {
         return [];
     }
 
-    const { data, error } = await supabase
+    // Hämta vanliga workouts
+    const { data: workouts, error: workoutError } = await supabase
         .from("workouts")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-    if (error) {
-        console.error("Kunde inte hämta träningshistorik:", error);
+    if (workoutError) {
+        console.error(
+            "Kunde inte hämta träningshistorik:",
+            workoutError
+        );
         return [];
     }
 
-    console.log("Träningshistorik från Supabase:", data);
+    // Hämta custom-övningar + information om vilket custom-pass de tillhör
+    const { data: customExercises, error: customError } = await supabase
+        .from("custom_workout_exercises")
+        .select(`
+            *,
+            custom_workouts (
+                name,
+                category
+            )
+        `)
+        .eq("user_id", user.id);
 
-    return data;
+    if (customError) {
+        console.error(
+            "Kunde inte hämta custom-övningar:",
+            customError
+        );
+    }
+
+    // Gör custom-övningarna till samma format som vanliga workouts
+    const formattedCustomExercises = (customExercises || []).map(
+        (customExercise: any) => {
+
+            const customWorkout =
+                customExercise.custom_workouts;
+
+            return {
+                id: `custom-${customExercise.id}`,
+                category: customWorkout?.category,
+                exercise: customExercise.exercise,
+                weight: customExercise.weight,
+                reps: customExercise.reps,
+                date: new Date(
+                    customExercise.created_at
+                ).toLocaleDateString("sv-SE"),
+                created_at: customExercise.created_at
+            };
+        }
+    );
+
+    // Kombinera vanliga och custom workouts
+    const allWorkouts = [
+        ...(workouts || []),
+        ...formattedCustomExercises
+    ];
+
+    // Nyast först
+    allWorkouts.sort(
+        (a, b) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+    );
+
+    console.log(
+        "All träningshistorik från Supabase:",
+        allWorkouts
+    );
+
+    return allWorkouts;
 }
 
 // =========================
@@ -522,6 +1343,19 @@ backFromLegsButton.addEventListener("click", () => {
 backFromHistoryButton.addEventListener("click", () => {
     showPage(homePage);
 });
+
+customWorkoutButton.addEventListener("click", () => {
+    showPage(customWorkoutPage);
+});
+
+backFromCustomWorkoutButton.addEventListener("click", () => {
+    showPage(homePage);
+});
+
+backFromCustomTrainingButton.addEventListener("click", () => {
+    showPage(homePage);
+});
+
 // =========================
 // PUSH
 // =========================
@@ -979,10 +1813,11 @@ async function checkLogin(): Promise<void> {
 
     if (session) {
 
-        // Användaren är redan inloggad
         loginPage.classList.add("hidden");
 
         showPage(homePage);
+
+        await renderCustomWorkouts();
 
         console.log(
             "Redan inloggad:",

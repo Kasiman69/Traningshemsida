@@ -7,8 +7,8 @@
     <title>Min träning</title>
 
     <link rel="manifest" href="/Traningshemsida/assets/manifest-Bx_YZnw0.json">
-  <script type="module" crossorigin src="/Traningshemsida/assets/index-DNpMZQPj.js"></script>
-  <link rel="stylesheet" crossorigin href="/Traningshemsida/assets/index-BEiT7bAt.css">
+  <script type="module" crossorigin src="/Traningshemsida/assets/index-Bng2qe3r.js"></script>
+  <link rel="stylesheet" crossorigin href="/Traningshemsida/assets/index-yemA8Toz.css">
 </head>
 
 <body>
@@ -86,6 +86,14 @@
                 <button id="chooseHistoryButton">
                     Historik
                 </button>
+
+                <button id="customWorkoutButton">
+                    Eget träningspass
+                </button>
+
+                <h3>Mina egna träningspass</h3>
+
+                <div id="savedCustomWorkouts"></div>
 
             </div>
 
@@ -526,6 +534,90 @@
 
         </section>
 
+        <section id="customWorkoutPage" style="display: none;">
+            <h2>Skapa eget träningspass</h2>
+
+            <label for="customWorkoutName">Namn på träningspass:</label>
+            <input
+                type="text"
+                id="customWorkoutName"
+                placeholder="Exempel: Bröst & Triceps"
+            >
+
+            <label for="customWorkoutCategory">Kategori:</label>
+            <select id="customWorkoutCategory">
+                <option value="Push">Push</option>
+                <option value="Pull">Pull</option>
+                <option value="Legs">Legs</option>
+            </select>
+
+            <h3>Övningar</h3>
+
+            <div id="customExercises"></div>
+
+            <button id="addCustomExerciseButton">
+                + Lägg till övning
+            </button>
+
+            <button id="saveCustomWorkoutButton">
+                Spara träningspass
+            </button>
+
+            <button id="backFromCustomWorkoutButton">
+                Tillbaka
+            </button>
+        </section>
+
+        <!-- EGET TRÄNINGSPASS -->
+        <section id="customWorkoutTrainingPage" class="workout-page hidden">
+
+            <button id="backFromCustomTrainingButton" class="back-button">
+                ← Tillbaka
+            </button>
+
+            <h1 id="customTrainingTitle"></h1>
+
+            <!-- Förra passet -->
+            <div class="previous-workout">
+
+                <h2>Förra passet</h2>
+
+                <div id="customPreviousWorkout">
+                    <p>Inget tidigare pass sparat ännu.</p>
+                </div>
+
+            </div>
+
+
+            <!-- Dagens pass -->
+            <div class="workout-card custom-card">
+
+                <h2>Dagens pass</h2>
+
+                <!-- Dagens sparade set -->
+                <div id="customTodayWorkout">
+
+                    <h3>Dagens sparade set</h3>
+
+                    <div id="todayCustomSets">
+                        <p>Inga set sparade ännu.</p>
+                    </div>
+
+                </div>
+
+
+                <!-- Avsluta pass -->
+                <button id="finishCustomWorkoutButton">
+                    Avsluta eget träningspass
+                </button>
+
+
+                <!-- Övningarna skapas av TypeScript -->
+                <div id="customTrainingExercises"></div>
+
+            </div>
+
+        </section>
     </main>
 
 
