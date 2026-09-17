@@ -34,6 +34,45 @@ const finishCustomWorkoutButton = document.getElementById("finishCustomWorkoutBu
 
 const customTrainingTitle = document.getElementById("customTrainingTitle") as HTMLHeadingElement;
 const customTrainingExercises = document.getElementById("customTrainingExercises") as HTMLDivElement;
+
+finishCustomWorkoutButton.addEventListener("click", async () => {
+
+    if (!currentCustomWorkoutSessionId) {
+        alert("Du har inga sparade set i detta pass ännu.");
+        return;
+    }
+
+    const {
+        data: { user },
+        error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        alert("Du måste vara inloggad.");
+        return;
+    }
+
+    const { data: completedSession, error } = await supabase
+        .from("custom_workout_sessions")
+        .update({ completed_at: new Date().toISOString() })
+        .eq("id", currentCustomWorkoutSessionId)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+    if (error || !completedSession) {
+        console.error("Kunde inte avsluta eget träningspass:", error);
+        alert("Kunde inte avsluta träningspasset.");
+        return;
+    }
+
+    currentCustomWorkoutSessionId = null;
+    currentCustomWorkoutId = null;
+
+    await renderCustomWorkouts();
+    showPage(customWorkoutPage);
+});
+
 // =========================
 // LOGIN / SKAPA KONTO
 // =========================
@@ -203,10 +242,9 @@ saveCustomWorkoutButton.addEventListener("click", async () => {
 
     const workoutName = customWorkoutName.value.trim();
 
-    const customWorkoutCategory =
-        document.getElementById("customWorkoutCategory") as HTMLSelectElement;
-
-    const category = customWorkoutCategory.value;
+    // Egna pass har ingen kategori som användaren behöver välja.
+    // Värdet behålls för kompatibilitet med den befintliga databastabellen.
+    const category = "Custom";
 
     if (!workoutName) {
         alert("Skriv ett namn på träningspasset.");
@@ -280,8 +318,6 @@ saveCustomWorkoutButton.addEventListener("click", async () => {
     );
 
 
-    alert("Träningspasset har sparats!");
-
     await renderCustomWorkouts();
 
     // Rensa formuläret
@@ -331,19 +367,114 @@ async function renderCustomWorkouts(): Promise<void> {
 
     for (const workout of data) {
 
-        const button =
+        const workoutItem =
+            document.createElement("div");
+
+        workoutItem.className =
+            "saved-custom-workout";
+
+        const openButton =
             document.createElement("button");
 
-        button.textContent = workout.name;
+        openButton.textContent = workout.name;
 
-        button.addEventListener("click", () => {
+        openButton.addEventListener("click", () => {
 
             openCustomWorkout(workout);
 
         });
 
-        savedCustomWorkouts.appendChild(button);
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.type = "button";
+        deleteButton.className = "delete-custom-workout";
+        deleteButton.textContent = "Radera";
+
+        deleteButton.addEventListener("click", async () => {
+            if (!window.confirm(
+                `Vill du radera träningspasset \"${workout.name}\" och all dess historik?`
+            )) {
+                return;
+            }
+
+            const wasDeleted = await deleteCustomWorkout(workout.id);
+
+            if (wasDeleted) {
+                await renderCustomWorkouts();
+            }
+        });
+
+        workoutItem.append(openButton, deleteButton);
+        savedCustomWorkouts.appendChild(workoutItem);
     }
+}
+
+async function deleteCustomWorkout(workoutId: any): Promise<boolean> {
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        alert("Du måste vara inloggad.");
+        return false;
+    }
+
+    const { data: sessions, error: sessionsError } = await supabase
+        .from("custom_workout_sessions")
+        .select("id")
+        .eq("custom_workout_id", workoutId)
+        .eq("user_id", user.id);
+
+    if (sessionsError) {
+        console.error("Kunde inte hämta passets sessioner:", sessionsError);
+        alert("Kunde inte radera träningspasset.");
+        return false;
+    }
+
+    const sessionIds = (sessions || []).map((session: any) => session.id);
+
+    if (sessionIds.length > 0) {
+        const { error: exercisesError } = await supabase
+            .from("custom_workout_exercises")
+            .delete()
+            .in("workout_id", sessionIds)
+            .eq("user_id", user.id);
+
+        if (exercisesError) {
+            console.error("Kunde inte radera passets set:", exercisesError);
+            alert("Kunde inte radera träningspasset.");
+            return false;
+        }
+
+        const { error: deleteSessionsError } = await supabase
+            .from("custom_workout_sessions")
+            .delete()
+            .in("id", sessionIds)
+            .eq("user_id", user.id);
+
+        if (deleteSessionsError) {
+            console.error("Kunde inte radera passets sessioner:", deleteSessionsError);
+            alert("Kunde inte radera träningspasset.");
+            return false;
+        }
+    }
+
+    const { data: deletedWorkout, error: deleteWorkoutError } = await supabase
+        .from("custom_workouts")
+        .delete()
+        .eq("id", workoutId)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+    if (deleteWorkoutError || !deletedWorkout) {
+        console.error("Kunde inte radera träningspasset:", deleteWorkoutError);
+        alert("Kunde inte radera träningspasset.");
+        return false;
+    }
+
+    return true;
 }
 
 /* Öppna ett eget träningspass */
@@ -385,7 +516,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
     // Hämta senaste avslutade sessionen
     const {
-        data: previousSession,
+        data: completedPreviousSession,
         error: previousSessionError
     } = await supabase
         .from("custom_workout_sessions")
@@ -405,6 +536,34 @@ async function openCustomWorkout(workout: any): Promise<void> {
         );
     }
 
+
+    // Äldre pass skapades innan completed_at sattes när användaren
+    // avslutade passet. Om inget avslutat pass finns, visa därför det
+    // senaste sparade passet i stället.
+    let previousSession = completedPreviousSession;
+
+    if (!previousSession && !previousSessionError) {
+        const {
+            data: latestSession,
+            error: latestSessionError
+        } = await supabase
+            .from("custom_workout_sessions")
+            .select("id")
+            .eq("custom_workout_id", workout.id)
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (latestSessionError) {
+            console.error(
+                "Kunde inte hämta senaste sparade passet:",
+                latestSessionError
+            );
+        } else {
+            previousSession = latestSession;
+        }
+    }
 
     let previousExercises: any[] = [];
 
@@ -475,6 +634,25 @@ async function openCustomWorkout(workout: any): Promise<void> {
         }
     }
 
+    const showHistoryButton = document.createElement("button");
+    showHistoryButton.type = "button";
+    showHistoryButton.textContent = "Visa all historik";
+
+    showHistoryButton.addEventListener("click", async () => {
+        const allHistoryContainer = document.createElement("div");
+        allHistoryContainer.className = "custom-workout-history";
+
+        previousWorkoutContainer.appendChild(allHistoryContainer);
+        showHistoryButton.remove();
+
+        await renderAllCustomWorkoutHistory(
+            workout.id,
+            allHistoryContainer
+        );
+    });
+
+    previousWorkoutContainer.appendChild(showHistoryButton);
+
 
     /* =========================================
        DAGENS SPARADE SET
@@ -493,11 +671,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
      * Vi använder samma typ av sparad-rad
      * som resten av hemsidan.
      */
-    const addTodaySet = (
-        exercise: string,
-        weight: number,
-        reps: number
-    ) => {
+    const addTodaySet = (savedSet: any) => {
 
         // Om standardtexten finns kvar,
         // ta bort den först.
@@ -511,15 +685,120 @@ async function openCustomWorkout(workout: any): Promise<void> {
         }
 
         const entry =
-            document.createElement("p");
+            document.createElement("div");
 
         entry.className =
             "saved-set";
 
-        entry.textContent =
-            `${exercise}: ` +
-            `${weight} kg × ` +
-            `${reps} reps`;
+        const setText =
+            document.createElement("p");
+
+        const editButton =
+            document.createElement("button");
+
+        editButton.type = "button";
+        editButton.textContent = "Ändra";
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.type = "button";
+        deleteButton.textContent = "Radera";
+
+        const showSavedSet = () => {
+            setText.textContent =
+                `${savedSet.exercise}: ` +
+                `${savedSet.weight} kg × ` +
+                `${savedSet.reps} reps`;
+
+            entry.replaceChildren(setText, editButton, deleteButton);
+        };
+
+        editButton.addEventListener("click", () => {
+            const weightInput = document.createElement("input");
+            weightInput.type = "number";
+            weightInput.step = "0.5";
+            weightInput.value = String(savedSet.weight);
+            weightInput.setAttribute("aria-label", "Ny vikt i kilogram");
+
+            const repsInput = document.createElement("input");
+            repsInput.type = "number";
+            repsInput.value = String(savedSet.reps);
+            repsInput.setAttribute("aria-label", "Nytt antal reps");
+
+            const saveButton = document.createElement("button");
+            saveButton.type = "button";
+            saveButton.textContent = "Spara ändring";
+
+            const cancelButton = document.createElement("button");
+            cancelButton.type = "button";
+            cancelButton.textContent = "Avbryt";
+
+            cancelButton.addEventListener("click", showSavedSet);
+
+            saveButton.addEventListener("click", async () => {
+                const weight = Number(weightInput.value);
+                const reps = Number(repsInput.value);
+
+                if (weight < 0 || reps <= 0) {
+                    alert("Vikt kan inte vara mindre än 0 och reps måste vara större än 0.");
+                    return;
+                }
+
+                const { data: updatedSet, error } = await supabase
+                    .from("custom_workout_exercises")
+                    .update({ weight, reps })
+                    .eq("id", savedSet.id)
+                    .eq("user_id", user.id)
+                    .select()
+                    .single();
+
+                if (error || !updatedSet) {
+                    console.error("Kunde inte ändra set:", error);
+                    alert("Kunde inte ändra setet.");
+                    return;
+                }
+
+                savedSet = updatedSet;
+                showSavedSet();
+            });
+
+            entry.replaceChildren(
+                weightInput,
+                repsInput,
+                saveButton,
+                cancelButton
+            );
+        });
+
+        deleteButton.addEventListener("click", async () => {
+            if (!window.confirm("Vill du radera det här setet?")) {
+                return;
+            }
+
+            const { error } = await supabase
+                .from("custom_workout_exercises")
+                .delete()
+                .eq("id", savedSet.id)
+                .eq("user_id", user.id);
+
+            if (error) {
+                console.error("Kunde inte radera set:", error);
+                alert("Kunde inte radera setet.");
+                return;
+            }
+
+            entry.remove();
+
+            if (!todaySetsList.querySelector(".saved-set")) {
+                const emptyText = document.createElement("p");
+                emptyText.className = "empty-set-message";
+                emptyText.textContent = "Inga set sparade ännu.";
+                todaySetsList.appendChild(emptyText);
+            }
+        });
+
+        showSavedSet();
 
         todaySetsList.appendChild(entry);
     };
@@ -658,12 +937,12 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
 
                 if (
-                    weight <= 0 ||
+                    weight < 0 ||
                     reps <= 0
                 ) {
 
                     alert(
-                        "Vikt och reps måste vara större än 0."
+                        "Vikt kan inte vara mindre än 0 och reps måste vara större än 0."
                     );
 
                     return;
@@ -787,26 +1066,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
                 }
 
 
-                const setText =
-                    document.createElement("p");
-
-                setText.className =
-                    "saved-set";
-
-                setText.textContent =
-                    `${savedSet.exercise}: ` +
-                    `${savedSet.weight} kg × ` +
-                    `${savedSet.reps} reps`;
-
-
-                todaySetsList.appendChild(
-                    setText
-                );
-
-
-                // Töm inputfälten efter sparning
-                weightInput.value = "";
-                repsInput.value = "";
+                addTodaySet(savedSet);
 
 
                 console.log(
@@ -852,6 +1112,70 @@ async function openCustomWorkout(workout: any): Promise<void> {
     }
 }
 
+
+async function renderAllCustomWorkoutHistory(
+    customWorkoutId: any,
+    container: HTMLElement
+): Promise<void> {
+    container.innerHTML = "";
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        container.textContent = "Du måste vara inloggad för att se historiken.";
+        return;
+    }
+
+    const { data: sessions, error: sessionsError } = await supabase
+        .from("custom_workout_sessions")
+        .select("id, created_at, completed_at")
+        .eq("custom_workout_id", customWorkoutId)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+    if (sessionsError) {
+        console.error("Kunde inte hämta passets historik:", sessionsError);
+        container.textContent = "Kunde inte hämta historiken.";
+        return;
+    }
+
+    if (!sessions || sessions.length === 0) {
+        container.textContent = "Ingen historik sparad ännu.";
+        return;
+    }
+
+    const historyTitle = document.createElement("h3");
+    historyTitle.textContent = "All historik";
+    container.appendChild(historyTitle);
+
+    for (const session of sessions) {
+        const sessionDate = document.createElement("h4");
+        const timestamp = session.completed_at || session.created_at;
+        sessionDate.textContent = new Date(timestamp).toLocaleDateString("sv-SE");
+        container.appendChild(sessionDate);
+
+        const { data: exercises, error: exercisesError } = await supabase
+            .from("custom_workout_exercises")
+            .select("exercise, weight, reps, position")
+            .eq("workout_id", session.id)
+            .eq("user_id", user.id)
+            .order("position", { ascending: true });
+
+        if (exercisesError) {
+            console.error("Kunde inte hämta set från historiken:", exercisesError);
+            continue;
+        }
+
+        for (const exercise of exercises || []) {
+            const entry = document.createElement("p");
+            entry.textContent =
+                `${exercise.exercise}: ${exercise.weight} kg × ${exercise.reps} reps`;
+            container.appendChild(entry);
+        }
+    }
+}
 
 // =========================
 // VISA FÖREGÅENDE PASS
@@ -927,6 +1251,67 @@ async function renderPreviousWorkout(category: string): Promise<void> {
         `Datum: ${lastWorkout.date}`;
 
     previousWorkoutElement.appendChild(date);
+
+    const showHistoryButton = document.createElement("button");
+    showHistoryButton.type = "button";
+    showHistoryButton.textContent = "Visa all historik";
+
+    showHistoryButton.addEventListener("click", async () => {
+        await renderAllWorkoutHistory(
+            category,
+            previousWorkoutElement
+        );
+    });
+
+    previousWorkoutElement.appendChild(showHistoryButton);
+}
+
+async function renderAllWorkoutHistory(
+    category: string,
+    container: HTMLElement
+): Promise<void> {
+    const workouts = await getWorkoutsFromSupabase();
+    const categoryWorkouts = workouts.filter(
+        workout => workout.category === category
+    );
+
+    container.innerHTML = "";
+
+    if (categoryWorkouts.length === 0) {
+        container.innerHTML = "<p>Ingen historik sparad ännu.</p>";
+        return;
+    }
+
+    const workoutsByDate = new Map<string, any[]>();
+
+    for (const workout of categoryWorkouts) {
+        const workoutsForDate = workoutsByDate.get(workout.date) || [];
+        workoutsForDate.push(workout);
+        workoutsByDate.set(workout.date, workoutsForDate);
+    }
+
+    for (const [date, workoutsForDate] of workoutsByDate) {
+        const sessionTitle = document.createElement("h3");
+        sessionTitle.textContent = date;
+        container.appendChild(sessionTitle);
+
+        for (const workout of workoutsForDate) {
+            const entry = document.createElement("p");
+            entry.textContent =
+                `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps`;
+            container.appendChild(entry);
+        }
+    }
+
+    const showPreviousButton = document.createElement("button");
+    showPreviousButton.type = "button";
+    showPreviousButton.textContent = "Visa endast förra passet";
+
+    showPreviousButton.addEventListener("click", async () => {
+        await renderPreviousWorkout(category);
+    });
+
+    container.appendChild(showPreviousButton);
 }
 
 
@@ -977,11 +1362,93 @@ function renderActiveWorkout(category: string): void {
 
     for (const workout of activeWorkout.workouts) {
 
-        const entry = document.createElement("p");
+        const entry = document.createElement("div");
+        entry.className = "saved-set";
 
-        entry.textContent =
-            `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps`;
+        const setText = document.createElement("p");
+        const editButton = document.createElement("button");
 
+        editButton.type = "button";
+        editButton.textContent = "Ändra";
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Radera";
+
+        const showSavedSet = () => {
+            setText.textContent =
+                `${workout.exercise}: ${workout.weight} kg × ${workout.reps} reps`;
+
+            entry.replaceChildren(setText, editButton, deleteButton);
+        };
+
+        editButton.addEventListener("click", () => {
+            const weightInput = document.createElement("input");
+            weightInput.type = "number";
+            weightInput.step = "0.5";
+            weightInput.value = String(workout.weight);
+            weightInput.setAttribute("aria-label", "Ny vikt i kilogram");
+
+            const repsInput = document.createElement("input");
+            repsInput.type = "number";
+            repsInput.value = String(workout.reps);
+            repsInput.setAttribute("aria-label", "Nytt antal reps");
+
+            const saveButton = document.createElement("button");
+            saveButton.type = "button";
+            saveButton.textContent = "Spara ändring";
+
+            const cancelButton = document.createElement("button");
+            cancelButton.type = "button";
+            cancelButton.textContent = "Avbryt";
+
+            cancelButton.addEventListener("click", showSavedSet);
+
+            saveButton.addEventListener("click", async () => {
+                const weight = Number(weightInput.value);
+                const reps = Number(repsInput.value);
+
+                if (weight < 0 || reps <= 0) {
+                    alert("Vikt kan inte vara mindre än 0 och reps måste vara större än 0.");
+                    return;
+                }
+
+                const updatedWorkout = await updateActiveWorkoutSet(
+                    workout,
+                    weight,
+                    reps
+                );
+
+                if (!updatedWorkout) {
+                    return;
+                }
+
+                workout.weight = updatedWorkout.weight;
+                workout.reps = updatedWorkout.reps;
+                showSavedSet();
+            });
+
+            entry.replaceChildren(
+                weightInput,
+                repsInput,
+                saveButton,
+                cancelButton
+            );
+        });
+
+        deleteButton.addEventListener("click", async () => {
+            if (!window.confirm("Vill du radera det här setet?")) {
+                return;
+            }
+
+            const wasDeleted = await deleteActiveWorkoutSet(workout);
+
+            if (wasDeleted) {
+                renderActiveWorkout(category);
+            }
+        });
+
+        showSavedSet();
         element.appendChild(entry);
     }
 }
@@ -995,6 +1462,97 @@ function getActiveWorkout() {
     return JSON.parse(
         localStorage.getItem("activeWorkout") || "null"
     );
+}
+
+async function updateActiveWorkoutSet(
+    workout: any,
+    weight: number,
+    reps: number
+): Promise<any | null> {
+    if (!workout.databaseId) {
+        alert("Det här setet skapades innan ändra-funktionen lades till och kan inte ändras.");
+        return null;
+    }
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        alert("Du måste vara inloggad.");
+        return null;
+    }
+
+    const { data, error } = await supabase
+        .from("workouts")
+        .update({ weight, reps })
+        .eq("id", workout.databaseId)
+        .eq("user_id", user.id)
+        .select()
+        .maybeSingle();
+
+    if (error || !data) {
+        console.error("Kunde inte ändra set:", error);
+        alert("Kunde inte ändra setet.");
+        return null;
+    }
+
+    const activeWorkout = getActiveWorkout();
+    const savedWorkout = activeWorkout?.workouts.find(
+        (item: any) => item.id === workout.id
+    );
+
+    if (savedWorkout) {
+        savedWorkout.weight = data.weight;
+        savedWorkout.reps = data.reps;
+        localStorage.setItem("activeWorkout", JSON.stringify(activeWorkout));
+    }
+
+    return data;
+}
+
+async function deleteActiveWorkoutSet(
+    workout: any
+): Promise<boolean> {
+    if (!workout.databaseId) {
+        alert("Det här setet skapades innan radera-funktionen lades till och kan inte raderas.");
+        return false;
+    }
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        alert("Du måste vara inloggad.");
+        return false;
+    }
+
+    const { data, error } = await supabase
+        .from("workouts")
+        .delete()
+        .eq("id", workout.databaseId)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+    if (error || !data) {
+        console.error("Kunde inte radera set:", error);
+        alert("Kunde inte radera setet.");
+        return false;
+    }
+
+    const activeWorkout = getActiveWorkout();
+
+    if (activeWorkout) {
+        activeWorkout.workouts = activeWorkout.workouts.filter(
+            (item: any) => item.id !== workout.id
+        );
+
+        localStorage.setItem("activeWorkout", JSON.stringify(activeWorkout));
+    }
+
+    return true;
 }
 
 async function saveWorkout(
@@ -1030,6 +1588,19 @@ async function saveWorkout(
     }
 
 
+    // Spara setet i Supabase först så att den lokala raden kan kopplas
+    // till rätt databasrad när användaren vill ändra den.
+    const savedWorkout = await saveWorkoutToSupabase(
+        category,
+        exercise,
+        Number(weight),
+        Number(reps)
+    );
+
+    if (!savedWorkout) {
+        return;
+    }
+
     const workout = {
 
         id: Date.now().toString(),
@@ -1044,7 +1615,9 @@ async function saveWorkout(
 
         reps: reps,
 
-        date: activeWorkout.date
+        date: activeWorkout.date,
+
+        databaseId: savedWorkout.id
     };
 
 
@@ -1057,17 +1630,6 @@ async function saveWorkout(
         "activeWorkout",
         JSON.stringify(activeWorkout)
     );
-
-
-    // Spara setet i Supabase
-    await saveWorkoutToSupabase(
-        category,
-        exercise,
-        Number(weight),
-        Number(reps)
-    );
-
-
     // Visa dagens pass
     renderActiveWorkout(category);
 }
@@ -1137,7 +1699,7 @@ async function saveWorkoutToSupabase(
 
   if (!user) {
     console.error("Ingen användare är inloggad");
-    return;
+    return null;
   }
 
   const { data, error } = await supabase
@@ -1149,14 +1711,16 @@ async function saveWorkoutToSupabase(
       weight: weight,
       reps: reps,
     })
-    .select();
+    .select()
+    .single();
 
   if (error) {
     console.error("Kunde inte spara träningspass:", error);
-    return;
+    return null;
   }
 
   console.log("Träningspass sparat i Supabase:", data);
+  return data;
 }
 
 async function loginTestUser() {
@@ -1283,8 +1847,6 @@ async function finishWorkout(category: string): Promise<void> {
     // Uppdatera sidan
     renderActiveWorkout(category);
     await renderHistory();
-
-    alert("Passet är avslutat och sparat!");
 }
 
 // =========================

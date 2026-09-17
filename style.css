@@ -327,6 +327,24 @@ button[type="submit"]:hover {
     margin: 0 auto;
 }
 
+.saved-custom-workout {
+    display: flex;
+    gap: 8px;
+}
+
+.saved-custom-workout button:first-child {
+    flex: 1;
+}
+
+.saved-custom-workout .delete-custom-workout {
+    width: auto;
+    background: #7f1d1d;
+}
+
+.saved-custom-workout .delete-custom-workout:hover {
+    background: #b91c1c;
+}
+
 /* Samma styling som sparade träningspass */
 #customWorkoutTrainingPage .previous-workout {
     margin: 25px 0;
@@ -338,7 +356,10 @@ button[type="submit"]:hover {
 }
 
 /* Samma styling som vanliga sparade set */
-#customWorkoutTrainingPage .saved-set {
+#customWorkoutTrainingPage .saved-set,
+#todayPush .saved-set,
+#todayPull .saved-set,
+#todayLegs .saved-set {
     margin: 10px 0;
     padding: 12px;
 
@@ -347,6 +368,31 @@ button[type="submit"]:hover {
     border-radius: 8px;
 
     font-size: 14px;
+}
+
+#customWorkoutTrainingPage .saved-set p,
+#todayPush .saved-set p,
+#todayPull .saved-set p,
+#todayLegs .saved-set p {
+    margin: 0;
+}
+
+#customWorkoutTrainingPage .saved-set button,
+#todayPush .saved-set button,
+#todayPull .saved-set button,
+#todayLegs .saved-set button {
+    width: auto;
+    margin: 8px 8px 0 0;
+}
+
+.custom-workout-history {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.custom-workout-history h4 {
+    margin: 16px 0 6px;
 }
 
 /* Övningarna */
