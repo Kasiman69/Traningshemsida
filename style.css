@@ -3,6 +3,9 @@
     box-sizing: border-box;
 }
 
+#loginPage .auth-text-button { background: transparent; color: #b92d64; box-shadow: none; font-size: 14px; }
+#loginPage [hidden], #loginPage .hidden { display: none; }
+
 body {
     margin: 0;
     padding: 20px;

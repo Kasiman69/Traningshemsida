@@ -101,6 +101,104 @@ const signupButton =
 const authMessage =
     document.getElementById("authMessage") as HTMLParagraphElement;
 
+const normalAuth = document.getElementById("normalAuth")!;
+const requestResetForm = document.getElementById("requestResetForm") as HTMLFormElement;
+const newPasswordForm = document.getElementById("newPasswordForm") as HTMLFormElement;
+const resetEmail = document.getElementById("resetEmail") as HTMLInputElement;
+const newPassword = document.getElementById("newPassword") as HTMLInputElement;
+const confirmPassword = document.getElementById("confirmPassword") as HTMLInputElement;
+const resetBackButton = document.getElementById("resetBackButton") as HTMLButtonElement;
+const recoveryHash = new URLSearchParams(window.location.hash.slice(1));
+let recoveryMode = new URLSearchParams(window.location.search).has("recovery") ||
+    recoveryHash.get("type") === "recovery";
+
+function showAuthMode(mode: "signin" | "request" | "reset"): void {
+    showPage(loginPage);
+    normalAuth.classList.toggle("hidden", mode !== "signin");
+    requestResetForm.classList.toggle("hidden", mode !== "request");
+    newPasswordForm.classList.toggle("hidden", mode !== "reset");
+    resetBackButton.classList.toggle("hidden", mode === "signin");
+    loginPage.querySelector("h1")!.textContent = mode === "signin" ? "Your training" : "Reset password";
+    (loginPage.querySelector(".auth-intro") as HTMLElement).hidden = mode !== "signin";
+    authMessage.textContent = "";
+}
+
+supabase.auth.onAuthStateChange((event) => {
+    if (event === "PASSWORD_RECOVERY") {
+        recoveryMode = true;
+        showAuthMode("reset");
+    }
+});
+
+document.getElementById("forgotPasswordButton")!.addEventListener("click", () => {
+    resetEmail.value = loginEmail.value;
+    showAuthMode("request");
+    resetEmail.focus();
+});
+
+resetBackButton.addEventListener("click", async () => {
+    if (recoveryMode) {
+        const { error } = await supabase.auth.signOut({ scope: "local" });
+        if (error) { authMessage.textContent = error.message; return; }
+    }
+    recoveryMode = false;
+    newPasswordForm.reset();
+    window.history.replaceState(null, "", window.location.pathname);
+    showAuthMode("signin");
+});
+
+requestResetForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = requestResetForm.querySelector("button")!;
+    if (button.disabled) return;
+    button.disabled = true;
+    button.textContent = "Sending…";
+    authMessage.textContent = "";
+    try {
+        const redirect = new URL(window.location.pathname, window.location.origin);
+        redirect.searchParams.set("recovery", "1");
+        const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.value.trim(), {
+            redirectTo: redirect.href
+        });
+        if (error) throw error;
+        authMessage.textContent = "If an account exists for that email, you’ll receive a reset link. Check your inbox and spam folder.";
+    } catch (error) {
+        authMessage.textContent = error instanceof Error ? error.message : "Could not send the reset email. Please try again.";
+    } finally {
+        button.disabled = false;
+        button.textContent = "Send reset link";
+    }
+});
+
+newPasswordForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (newPassword.value !== confirmPassword.value) {
+        authMessage.textContent = "Passwords do not match.";
+        return;
+    }
+    const button = newPasswordForm.querySelector("button")!;
+    if (button.disabled) return;
+    button.disabled = true;
+    button.textContent = "Saving…";
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("This reset link has expired. Request a new link.");
+        const { error } = await supabase.auth.updateUser({ password: newPassword.value });
+        if (error) throw error;
+        newPasswordForm.reset();
+        recoveryMode = false;
+        window.history.replaceState(null, "", window.location.pathname);
+        await supabase.auth.signOut({ scope: "local" });
+        showAuthMode("signin");
+        authMessage.textContent = "Password updated. Sign in with your new password.";
+    } catch (error) {
+        authMessage.textContent = error instanceof Error ? error.message : "Could not update your password. Please try again.";
+    } finally {
+        button.disabled = false;
+        button.textContent = "Save new password";
+    }
+});
+
 // =========================
 // LOGGA IN
 // =========================
@@ -2650,6 +2748,12 @@ async function checkLogin(): Promise<void> {
     const {
         data: { session }
     } = await supabase.auth.getSession();
+
+    if (recoveryMode) {
+        showAuthMode(session ? "reset" : "request");
+        if (!session) authMessage.textContent = "This reset link is invalid or expired. Request a new link below.";
+        return;
+    }
 
     if (session) {
 

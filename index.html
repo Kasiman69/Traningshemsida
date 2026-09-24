@@ -30,6 +30,7 @@
                     <h1>Your training</h1>
                     <p class="auth-intro">Sign in to continue to your workouts.</p>
 
+                    <div id="normalAuth">
                     <div class="auth-tab-row">
                         <span class="active">Sign in</span>
                         <span>Create account</span>
@@ -44,6 +45,7 @@
                     </div>
 
                     <button id="loginButton">Sign in <span aria-hidden="true">→</span></button>
+                    <button id="forgotPasswordButton" type="button" class="auth-text-button">Forgot password?</button>
 
                     <details class="signup-details">
                         <summary>Don't have an account?</summary>
@@ -56,7 +58,28 @@
                         <button id="signupButton">Create account <span aria-hidden="true">→</span></button>
                     </details>
 
-                    <p id="authMessage"></p>
+                    </div>
+                    <form id="requestResetForm" class="hidden">
+                        <p>Enter your email and we’ll send you a password reset link.</p>
+                        <div class="auth-fields">
+                            <label for="resetEmail">Email</label>
+                            <input id="resetEmail" type="email" autocomplete="email" placeholder="name@example.com" required>
+                        </div>
+                        <button type="submit">Send reset link</button>
+                    </form>
+                    <form id="newPasswordForm" class="hidden">
+                        <p>Choose a new password for your account.</p>
+                        <div class="auth-fields">
+                            <label for="newPassword">New password</label>
+                            <input id="newPassword" type="password" autocomplete="new-password" minlength="12" required>
+                            <label for="confirmPassword">Confirm password</label>
+                            <input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required>
+                        </div>
+                        <p>Use at least 12 characters.</p>
+                        <button type="submit">Save new password</button>
+                    </form>
+                    <button id="resetBackButton" class="auth-text-button hidden" type="button">Back to sign in</button>
+                    <p id="authMessage" role="status" aria-live="polite"></p>
                 </div>
             </section>
         </div>
