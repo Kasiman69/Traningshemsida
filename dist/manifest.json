@@ -1,7 +1,9 @@
 {
     "name": "Pöhner Training",
     "short_name": "Pöhner",
-    "start_url": "./",
+    "id": "/Traningshemsida/",
+    "start_url": "/Traningshemsida/",
+    "scope": "/Traningshemsida/",
     "display": "standalone",
     "background_color": "#fff7fb",
     "theme_color": "#e83d8c",
