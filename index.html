@@ -15,52 +15,48 @@
     <main>
 
         <div id="loginPage">
+            <header class="auth-brand">
+                <div class="brand-lockup">
+                    <img class="brand-mark" src="/icon.svg" alt="">
+                    <span>Pöhner träning</span>
+                </div>
+            </header>
 
-            <div class="brand-lockup">
-                <img class="brand-mark" src="/icon.svg" alt="">
-                <span>Pöhner träning</span>
-            </div>
+            <section class="auth-main">
+                <div class="auth-card">
+                    <p class="auth-kicker">PÖHNER TRÄNING</p>
+                    <h1>Din träning</h1>
+                    <p class="auth-intro">Logga in för att fortsätta till dina träningspass.</p>
 
-            <h2>Logga in</h2>
+                    <div class="auth-tab-row">
+                        <span class="active">Logga in</span>
+                        <span>Skapa konto</span>
+                    </div>
 
-            <input
-                type="email"
-                id="loginEmail"
-                placeholder="E-post"
-            >
+                    <div class="auth-fields">
+                        <label for="loginEmail">E-post</label>
+                        <input type="email" id="loginEmail" placeholder="namn@exempel.se">
 
-            <input
-                type="password"
-                id="loginPassword"
-                placeholder="Lösenord"
-            >
+                        <label for="loginPassword">Lösenord</label>
+                        <input type="password" id="loginPassword" placeholder="Skriv ditt lösenord">
+                    </div>
 
-            <button id="loginButton">
-                Logga in
-            </button>
+                    <button id="loginButton">Logga in <span aria-hidden="true">→</span></button>
 
-            <hr>
+                    <details class="signup-details">
+                        <summary>Har du inget konto?</summary>
+                        <div class="auth-fields">
+                            <label for="signupEmail">E-post</label>
+                            <input type="email" id="signupEmail" placeholder="namn@exempel.se">
+                            <label for="signupPassword">Lösenord</label>
+                            <input type="password" id="signupPassword" placeholder="Skapa ett lösenord">
+                        </div>
+                        <button id="signupButton">Skapa konto <span aria-hidden="true">→</span></button>
+                    </details>
 
-            <h2>Skapa konto</h2>
-
-            <input
-                type="email"
-                id="signupEmail"
-                placeholder="E-post"
-            >
-
-            <input
-                type="password"
-                id="signupPassword"
-                placeholder="Lösenord"
-            >
-
-            <button id="signupButton">
-                Skapa konto
-            </button>
-
-            <p id="authMessage"></p>
-
+                    <p id="authMessage"></p>
+                </div>
+            </section>
         </div>
 
         <!-- STARTSIDA -->

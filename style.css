@@ -430,10 +430,32 @@ p { color: var(--muted); }
     backdrop-filter: blur(14px);
 }
 
-#loginPage { padding: 34px; }
-#loginPage h1 { text-align: center; font-size: 2.25rem; }
+#loginPage { min-height: 100svh; width: 100%; max-width: none; margin: 0; padding: 0 24px; text-align: left; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+#loginPage h1 { text-align: left; font-size: 2rem; letter-spacing: -.045em; }
 #loginPage h2 { margin-top: 28px; }
 #loginPage hr { border-top-color: var(--line); }
+.auth-brand { width: 100%; max-width: 420px; margin: 0 auto; padding: 38px 0 0; }
+.auth-brand .brand-lockup { justify-content: flex-start; margin: 0; padding: 0; }
+.auth-brand .brand-mark { width: 39px; height: 39px; border-radius: 12px; }
+.auth-main { display: block; width: 100%; max-width: 420px; margin: 36px auto 64px; padding: 0; }
+.auth-card { max-width: none; padding: 30px; background: rgba(255,255,255,.94); border: 1px solid #edbfd4; border-radius: 16px; box-shadow: 0 12px 35px rgba(186,61,113,.10); }
+.auth-kicker { margin: 0 0 10px; color: var(--pink-dark); font-size: .68rem; font-weight: 800; letter-spacing: .17em; }
+.auth-intro { margin: 10px 0 25px; font-size: .9rem; line-height: 1.55; }
+.auth-tab-row { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; height: 46px; margin-bottom: 25px; padding: 4px; border-radius: 10px; background: var(--pink-soft); }
+.auth-tab-row span { display: grid; place-items: center; border-radius: 8px; color: var(--pink-dark); font-size: .86rem; font-weight: 600; }
+.auth-tab-row .active { background: #fff7fb; box-shadow: 0 1px 4px rgba(101,42,77,.08); }
+.auth-fields { display: grid; gap: 7px; text-align: left; }
+.auth-fields label { margin-top: 8px; color: var(--ink); font-size: .78rem; font-weight: 700; }
+#loginPage .auth-fields input { margin: 0 0 2px; }
+#loginPage #loginButton, #loginPage #signupButton { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 17px; }
+.signup-details { margin-top: 27px; padding-top: 21px; border-top: 1px solid var(--line); text-align: left; }
+.signup-details summary { color: var(--pink-dark); cursor: pointer; font-size: .86rem; font-weight: 700; text-align: center; list-style: none; }
+.signup-details summary::-webkit-details-marker { display: none; }
+.signup-details summary::before { content: '+'; display: inline-block; margin-right: 7px; font-size: 1.05rem; font-weight: 500; }
+.signup-details[open] summary::before { content: '−'; }
+.signup-details .auth-fields { margin-top: 12px; }
+#authMessage { min-height: 1.4em; margin-bottom: 0; font-size: .82rem; }
+@media (max-width: 760px) { #loginPage { padding: 0 20px; } .auth-brand { padding-top: 32px; } .auth-main { margin-top: 28px; } .auth-card { padding: 24px; } }
 
 .brand-lockup { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 28px; color: var(--plum); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
 .brand-mark { width: 42px; height: 42px; border-radius: 13px; box-shadow: 0 8px 20px rgba(232, 61, 140, 0.28); }
