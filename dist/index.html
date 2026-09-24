@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Pöhner träning</title>
+    <title>Pöhner Training</title>
 
-    <link rel="manifest" href="/Traningshemsida/assets/manifest-D6uJB5VY.json">
-  <script type="module" crossorigin src="/Traningshemsida/assets/index-DO4JT6uZ.js"></script>
-  <link rel="stylesheet" crossorigin href="/Traningshemsida/assets/index-D50IWt5u.css">
+    <link rel="manifest" href="/Traningshemsida/assets/manifest-kFln7Z4C.json">
+  <script type="module" crossorigin src="/Traningshemsida/assets/index-DZj0nkJP.js"></script>
+  <link rel="stylesheet" crossorigin href="/Traningshemsida/assets/index-CSif57FN.css">
 </head>
 
 <body>
@@ -19,40 +19,40 @@
             <header class="auth-brand">
                 <div class="brand-lockup">
                     <img class="brand-mark" src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3e%3cdefs%3e%3clinearGradient%20id='bg'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3e%3cstop%20stop-color='%235a2754'/%3e%3cstop%20offset='1'%20stop-color='%2324152b'/%3e%3c/linearGradient%3e%3clinearGradient%20id='bar'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3e%3cstop%20stop-color='%23ff83ba'/%3e%3cstop%20offset='1'%20stop-color='%23e83d8c'/%3e%3c/linearGradient%3e%3c/defs%3e%3crect%20width='512'%20height='512'%20rx='118'%20fill='url(%23bg)'/%3e%3ccircle%20cx='392'%20cy='112'%20r='68'%20fill='%23e83d8c'%20opacity='.16'/%3e%3cpath%20d='M122%20205v102M160%20170v172M352%20170v172M390%20205v102M160%20256h192'%20fill='none'%20stroke='url(%23bar)'%20stroke-width='34'%20stroke-linecap='round'/%3e%3cpath%20d='M160%20256h192'%20stroke='%23fff'%20stroke-opacity='.25'%20stroke-width='8'%20stroke-linecap='round'/%3e%3c/svg%3e" alt="">
-                    <span>Pöhner träning</span>
+                    <span>Pöhner Training</span>
                 </div>
             </header>
 
             <section class="auth-main">
                 <div class="auth-card">
-                    <p class="auth-kicker">PÖHNER TRÄNING</p>
-                    <h1>Din träning</h1>
-                    <p class="auth-intro">Logga in för att fortsätta till dina träningspass.</p>
+                    <p class="auth-kicker">PÖHNER TRAINING</p>
+                    <h1>Your training</h1>
+                    <p class="auth-intro">Sign in to continue to your workouts.</p>
 
                     <div class="auth-tab-row">
-                        <span class="active">Logga in</span>
-                        <span>Skapa konto</span>
+                        <span class="active">Sign in</span>
+                        <span>Create account</span>
                     </div>
 
                     <div class="auth-fields">
-                        <label for="loginEmail">E-post</label>
-                        <input type="email" id="loginEmail" placeholder="namn@exempel.se">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="name@example.com">
 
-                        <label for="loginPassword">Lösenord</label>
-                        <input type="password" id="loginPassword" placeholder="Skriv ditt lösenord">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password">
                     </div>
 
-                    <button id="loginButton">Logga in <span aria-hidden="true">→</span></button>
+                    <button id="loginButton">Sign in <span aria-hidden="true">→</span></button>
 
                     <details class="signup-details">
-                        <summary>Har du inget konto?</summary>
+                        <summary>Don't have an account?</summary>
                         <div class="auth-fields">
-                            <label for="signupEmail">E-post</label>
-                            <input type="email" id="signupEmail" placeholder="namn@exempel.se">
-                            <label for="signupPassword">Lösenord</label>
-                            <input type="password" id="signupPassword" placeholder="Skapa ett lösenord">
+                            <label for="signupEmail">Email</label>
+                            <input type="email" id="signupEmail" placeholder="name@example.com">
+                            <label for="signupPassword">Password</label>
+                            <input type="password" id="signupPassword" placeholder="Create a password">
                         </div>
-                        <button id="signupButton">Skapa konto <span aria-hidden="true">→</span></button>
+                        <button id="signupButton">Create account <span aria-hidden="true">→</span></button>
                     </details>
 
                     <p id="authMessage"></p>
@@ -62,45 +62,77 @@
 
         <!-- STARTSIDA -->
         <section id="homePage">
-
-            <button id="logoutButton">Logga ut</button>
-
-            <div class="page-heading">
-                <div>
-                    <p class="eyebrow">DIN TRÄNING, SAMLAD</p>
-                    <h1>Pöhner träning</h1>
+            <header class="home-header">
+                <div class="brand-lockup home-brand">
+                    <img class="brand-mark" src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3e%3cdefs%3e%3clinearGradient%20id='bg'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3e%3cstop%20stop-color='%235a2754'/%3e%3cstop%20offset='1'%20stop-color='%2324152b'/%3e%3c/linearGradient%3e%3clinearGradient%20id='bar'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3e%3cstop%20stop-color='%23ff83ba'/%3e%3cstop%20offset='1'%20stop-color='%23e83d8c'/%3e%3c/linearGradient%3e%3c/defs%3e%3crect%20width='512'%20height='512'%20rx='118'%20fill='url(%23bg)'/%3e%3ccircle%20cx='392'%20cy='112'%20r='68'%20fill='%23e83d8c'%20opacity='.16'/%3e%3cpath%20d='M122%20205v102M160%20170v172M352%20170v172M390%20205v102M160%20256h192'%20fill='none'%20stroke='url(%23bar)'%20stroke-width='34'%20stroke-linecap='round'/%3e%3cpath%20d='M160%20256h192'%20stroke='%23fff'%20stroke-opacity='.25'%20stroke-width='8'%20stroke-linecap='round'/%3e%3c/svg%3e" alt="">
+                    <span>Pöhner Training</span>
                 </div>
-                <span class="status-pill">● Aktiv</span>
-            </div>
+                <button id="logoutButton" class="home-logout">Sign out</button>
+            </header>
 
-            <h2>Vilket pass kör du idag?</h2>
+            <main class="home-main">
+                <div class="page-heading">
+                    <div>
+                        <p class="eyebrow">YOUR TRAINING, TOGETHER</p>
+                        <h1>Choose a workout</h1>
+                        <p class="home-intro">Track your progress and keep every session in one place.</p>
+                    </div>
+                    <span class="status-pill">● Active</span>
+                </div>
 
-            <div class="home-buttons">
+                <div class="home-card">
+                    <div class="home-card-heading">
+                        <div>
+                            <p class="section-kicker">WORKOUT LIBRARY</p>
+                            <h2>Start a session</h2>
+                        </div>
+                        <span class="home-card-icon">✦</span>
+                    </div>
+
+                    <div class="home-buttons">
                 <button id="choosePushButton">
-                    Push
+                    <span class="workout-letter push-letter">P</span>
+                    <span><strong>Push</strong><small>Chest, shoulders & triceps</small></span>
+                    <span class="card-arrow">→</span>
                 </button>
 
                 <button id="choosePullButton">
-                    Pull
+                    <span class="workout-letter pull-letter">P</span>
+                    <span><strong>Pull</strong><small>Back, biceps & rear delts</small></span>
+                    <span class="card-arrow">→</span>
                 </button>
 
                 <button id="chooseLegsButton">
-                    Legs
+                    <span class="workout-letter legs-letter">L</span>
+                    <span><strong>Legs</strong><small>Quads, hamstrings & calves</small></span>
+                    <span class="card-arrow">→</span>
                 </button>
 
                 <button id="chooseHistoryButton">
-                    Historik
+                    <span class="workout-letter history-letter">↗</span>
+                    <span><strong>History</strong><small>Review your previous sessions</small></span>
+                    <span class="card-arrow">→</span>
                 </button>
 
                 <button id="customWorkoutButton">
-                    Eget träningspass
+                    <span class="workout-letter custom-letter">+</span>
+                    <span><strong>Custom workout</strong><small>Build a session that fits you</small></span>
+                    <span class="card-arrow">→</span>
                 </button>
+                    </div>
+                </div>
 
-                <h3>Mina egna träningspass</h3>
+                <section class="saved-workouts-card">
+                    <div class="home-card-heading compact-heading">
+                        <div>
+                            <p class="section-kicker">YOUR LIBRARY</p>
+                            <h2>My custom workouts</h2>
+                        </div>
+                    </div>
 
-                <div id="savedCustomWorkouts"></div>
-
-            </div>
+                    <div id="savedCustomWorkouts"></div>
+                </section>
+            </main>
 
         </section>
 
@@ -109,36 +141,36 @@
         <section id="pushPage" class="workout-page hidden">
 
             <button id="backFromPushButton" class="back-button">
-                ← Tillbaka
+                ← Back
             </button>
 
             <h1>Push</h1>
 
             <div class="previous-workout">
-                <h2>Förra Push-passet</h2>
+                <h2>Previous Push workout</h2>
                 <div id="previousPush">
-                    <p>Inget tidigare Push-pass sparat ännu.</p>
+                    <p>No previous Push workout saved yet.</p>
                 </div>
             </div>
 
 
             <div class="workout-card push-card">
 
-                <h2>Dagens Push-pass</h2>
+                <h2>Today's Push workout</h2>
 
                 <div id="todayPush"></div>
 
                 <button id="finishPushButton">
-                    Avsluta Push-pass
+                    Finish Push workout
                 </button>
 
                 <!-- Bänkpress -->
                 <div class="exercise">
 
-                    <h3>Bänkpress</h3>
+                    <h3>Bench press</h3>
 
                     <label for="benchWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -157,7 +189,7 @@
                     >
 
                     <button id="benchSaveButton">
-                        Spara Bänkpress
+                        Save Bench Press
                     </button>
 
                 </div>
@@ -169,7 +201,7 @@
                     <h3>Axelpress</h3>
 
                     <label for="shoulderWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -188,7 +220,7 @@
                     >
 
                     <button id="shoulderSaveButton">
-                        Spara Axelpress
+                        Save Shoulder Press
                     </button>
 
                 </div>
@@ -200,7 +232,7 @@
                     <h3>Overhead Tricep Extension</h3>
 
                     <label for="tricepWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -219,7 +251,7 @@
                     >
 
                     <button id="tricepSaveButton">
-                        Spara Tricep Extension
+                        Save Tricep Extension
                     </button>
 
                 </div>
@@ -233,27 +265,27 @@
         <section id="pullPage" class="workout-page hidden">
 
             <button id="backFromPullButton" class="back-button">
-                ← Tillbaka
+                ← Back
             </button>
 
             <h1>Pull</h1>
 
             <div class="previous-workout">
-                <h2>Förra Pull-passet</h2>
+                <h2>Previous Pull workout</h2>
                 <div id="previousPull">
-                    <p>Inget tidigare Pull-pass sparat ännu.</p>
+                    <p>No previous Pull workout saved yet.</p>
                 </div>
             </div>
 
 
             <div class="workout-card pull-card">
 
-                <h2>Dagens Pull-pass</h2>
+                <h2>Today's Pull workout</h2>
 
                 <div id="todayPull"></div>
 
                 <button id="finishPullButton">
-                    Avsluta Pull-pass
+                    Finish Pull workout
                 </button>                
 
                 <!-- Marklyft -->
@@ -262,7 +294,7 @@
                     <h3>Marklyft</h3>
 
                     <label for="deadliftWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -281,7 +313,7 @@
                     >
 
                     <button id="deadliftSaveButton">
-                        Spara Marklyft
+                        Save Deadlift
                     </button>
 
                 </div>
@@ -312,7 +344,7 @@
                     >
 
                     <button id="pullupSaveButton">
-                        Spara Pullups
+                        Save Pull-ups
                     </button>
 
                 </div>
@@ -324,7 +356,7 @@
                     <h3>Biceps Curl</h3>
 
                     <label for="curlWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -343,7 +375,7 @@
                     >
 
                     <button id="curlSaveButton">
-                        Spara Biceps Curl
+                        Save Biceps Curl
                     </button>
 
                 </div>
@@ -357,27 +389,27 @@
         <section id="legsPage" class="workout-page hidden">
 
             <button id="backFromLegsButton" class="back-button">
-                ← Tillbaka
+                ← Back
             </button>
 
             <h1>Legs</h1>
 
             <div class="previous-workout">
-                <h2>Förra Legs-passet</h2>
+                <h2>Previous Legs workout</h2>
                 <div id="previousLegs">
-                    <p>Inget tidigare Legs-pass sparat ännu.</p>
+                    <p>No previous Legs workout saved yet.</p>
                 </div>
             </div>
 
 
             <div class="workout-card legs-card">
 
-                <h2>Dagens Legs-pass</h2>
+                <h2>Today's Legs workout</h2>
 
                 <div id="todayLegs"></div>
 
                 <button id="finishLegsButton">
-                    Avsluta Legs-pass
+                    Finish Legs workout
                 </button>
 
                 <!-- Squat -->
@@ -386,7 +418,7 @@
                     <h3>Squat</h3>
 
                     <label for="squatWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -405,7 +437,7 @@
                     >
 
                     <button id="squatSaveButton">
-                        Spara Squat
+                        Save Squat
                     </button>
 
                 </div>
@@ -417,7 +449,7 @@
                     <h3>Leg Extension</h3>
 
                     <label for="legExtensionWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -436,7 +468,7 @@
                     >
 
                     <button id="legExtensionSaveButton">
-                        Spara Leg Extension
+                        Save Leg Extension
                     </button>
 
                 </div>
@@ -448,7 +480,7 @@
                     <h3>Leg Curl</h3>
 
                     <label for="legCurlWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -467,7 +499,7 @@
                     >
 
                     <button id="legCurlSaveButton">
-                        Spara Leg Curl
+                        Save Leg Curl
                     </button>
 
                 </div>
@@ -479,7 +511,7 @@
                     <h3>Calf Raise</h3>
 
                     <label for="calfRaiseWeight">
-                        Vikt (kg):
+                        Weight (kg):
                     </label>
 
                     <input
@@ -498,7 +530,7 @@
                     >
 
                     <button id="calfRaiseSaveButton">
-                        Spara Calf Raise
+                        Save Calf Raise
                     </button>
 
                 </div>
@@ -513,10 +545,10 @@
         <section id="historyPage" class="hidden">
 
             <button id="backFromHistoryButton" class="back-button">
-                ← Tillbaka
+                ← Back
             </button>
 
-            <h2>Historik</h2>
+            <h2>History</h2>
 
             <div class="history-container">
 
@@ -540,29 +572,29 @@
         </section>
 
         <section id="customWorkoutPage" style="display: none;">
-            <h2>Skapa eget träningspass</h2>
+            <h2>Create custom workout</h2>
 
-            <label for="customWorkoutName">Namn på träningspass:</label>
+            <label for="customWorkoutName">Workout name:</label>
             <input
                 type="text"
                 id="customWorkoutName"
-                placeholder="Exempel: Bröst & Triceps"
+                placeholder="Example: Chest & Triceps"
             >
 
-            <h3>Övningar</h3>
+            <h3>Exercises</h3>
 
             <div id="customExercises"></div>
 
             <button id="addCustomExerciseButton">
-                + Lägg till övning
+                + Add exercise
             </button>
 
             <button id="saveCustomWorkoutButton">
-                Spara träningspass
+                Save workout
             </button>
 
             <button id="backFromCustomWorkoutButton">
-                Tillbaka
+                Back
             </button>
         </section>
 
@@ -570,7 +602,7 @@
         <section id="customWorkoutTrainingPage" class="workout-page hidden">
 
             <button id="backFromCustomTrainingButton" class="back-button">
-                ← Tillbaka
+                ← Back
             </button>
 
             <h1 id="customTrainingTitle"></h1>
@@ -578,10 +610,10 @@
             <!-- Förra passet -->
             <div class="previous-workout">
 
-                <h2>Förra passet</h2>
+                <h2>Previous workout</h2>
 
                 <div id="customPreviousWorkout">
-                    <p>Inget tidigare pass sparat ännu.</p>
+                    <p>No previous workout saved yet.</p>
                 </div>
 
             </div>
@@ -590,15 +622,15 @@
             <!-- Dagens pass -->
             <div class="workout-card custom-card">
 
-                <h2>Dagens pass</h2>
+                <h2>Today's workout</h2>
 
                 <!-- Dagens sparade set -->
                 <div id="customTodayWorkout">
 
-                    <h3>Dagens sparade set</h3>
+                    <h3>Today's saved sets</h3>
 
                     <div id="todayCustomSets">
-                        <p>Inga set sparade ännu.</p>
+                        <p>No sets saved yet.</p>
                     </div>
 
                 </div>
@@ -606,7 +638,7 @@
 
                 <!-- Avsluta pass -->
                 <button id="finishCustomWorkoutButton">
-                    Avsluta eget träningspass
+                    Finish custom workout
                 </button>
 
 

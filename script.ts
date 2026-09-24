@@ -38,7 +38,7 @@ const customTrainingExercises = document.getElementById("customTrainingExercises
 finishCustomWorkoutButton.addEventListener("click", async () => {
 
     if (!currentCustomWorkoutSessionId) {
-        alert("Du har inga sparade set i detta pass ännu.");
+        alert("You have no saved sets in this workout yet.");
         return;
     }
 
@@ -48,7 +48,7 @@ finishCustomWorkoutButton.addEventListener("click", async () => {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-        alert("Du måste vara inloggad.");
+        alert("You must be signed in.");
         return;
     }
 
@@ -62,7 +62,7 @@ finishCustomWorkoutButton.addEventListener("click", async () => {
 
     if (error || !completedSession) {
         console.error("Kunde inte avsluta eget träningspass:", error);
-        alert("Kunde inte avsluta träningspasset.");
+      alert("Could not finish the workout.");
         return;
     }
 
@@ -119,7 +119,7 @@ loginButton.addEventListener("click", async () => {
     if (error) {
 
         authMessage.textContent =
-            "Fel e-post eller lösenord.";
+            "Incorrect email or password.";
 
         console.error("Inloggning misslyckades:", error);
 
@@ -211,11 +211,11 @@ addCustomExerciseButton.addEventListener("click", () => {
     const exerciseInput = document.createElement("input");
 
     exerciseInput.type = "text";
-    exerciseInput.placeholder = "Namn på övning";
+    exerciseInput.placeholder = "Exercise name";
 
     const removeButton = document.createElement("button");
 
-    removeButton.textContent = "Ta bort";
+        removeButton.textContent = "Remove";
 
     removeButton.addEventListener("click", () => {
         exerciseContainer.remove();
@@ -247,7 +247,7 @@ saveCustomWorkoutButton.addEventListener("click", async () => {
     const category = "Custom";
 
     if (!workoutName) {
-        alert("Skriv ett namn på träningspasset.");
+        alert("Enter a workout name.");
         return;
     }
 
@@ -270,7 +270,7 @@ saveCustomWorkoutButton.addEventListener("click", async () => {
 
 
     if (exercises.length === 0) {
-        alert("Lägg till minst en övning.");
+        alert("Add at least one exercise.");
         return;
     }
 
@@ -306,7 +306,7 @@ saveCustomWorkoutButton.addEventListener("click", async () => {
             error
         );
 
-        alert("Kunde inte spara träningspasset.");
+        alert("Could not save the workout.");
 
         return;
     }
@@ -389,7 +389,7 @@ async function renderCustomWorkouts(): Promise<void> {
 
         deleteButton.type = "button";
         deleteButton.className = "delete-custom-workout";
-        deleteButton.textContent = "Radera";
+        deleteButton.textContent = "Delete";
 
         deleteButton.addEventListener("click", async () => {
             if (!window.confirm(
@@ -416,7 +416,7 @@ async function deleteCustomWorkout(workoutId: any): Promise<boolean> {
     } = await supabase.auth.getUser();
 
     if (!user) {
-        alert("Du måste vara inloggad.");
+        alert("You must be signed in.");
         return false;
     }
 
@@ -428,7 +428,7 @@ async function deleteCustomWorkout(workoutId: any): Promise<boolean> {
 
     if (sessionsError) {
         console.error("Kunde inte hämta passets sessioner:", sessionsError);
-        alert("Kunde inte radera träningspasset.");
+        alert("Could not delete the workout.");
         return false;
     }
 
@@ -443,7 +443,7 @@ async function deleteCustomWorkout(workoutId: any): Promise<boolean> {
 
         if (exercisesError) {
             console.error("Kunde inte radera passets set:", exercisesError);
-            alert("Kunde inte radera träningspasset.");
+            alert("Could not delete the workout.");
             return false;
         }
 
@@ -455,7 +455,7 @@ async function deleteCustomWorkout(workoutId: any): Promise<boolean> {
 
         if (deleteSessionsError) {
             console.error("Kunde inte radera passets sessioner:", deleteSessionsError);
-            alert("Kunde inte radera träningspasset.");
+            alert("Could not delete the workout.");
             return false;
         }
     }
@@ -470,7 +470,7 @@ async function deleteCustomWorkout(workoutId: any): Promise<boolean> {
 
     if (deleteWorkoutError || !deletedWorkout) {
         console.error("Kunde inte radera träningspasset:", deleteWorkoutError);
-        alert("Kunde inte radera träningspasset.");
+        alert("Could not delete the workout.");
         return false;
     }
 
@@ -607,7 +607,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
             document.createElement("p");
 
         noPreviousText.textContent =
-            "Inget tidigare pass sparat ännu.";
+                "No previous workout saved yet.";
 
         previousWorkoutContainer.appendChild(
             noPreviousText
@@ -636,7 +636,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
     const showHistoryButton = document.createElement("button");
     showHistoryButton.type = "button";
-    showHistoryButton.textContent = "Visa all historik";
+    showHistoryButton.textContent = "Show all history";
 
     showHistoryButton.addEventListener("click", async () => {
         const allHistoryContainer = document.createElement("div");
@@ -664,7 +664,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
         ) as HTMLDivElement;
 
     todaySetsList.innerHTML =
-        "<p>Inga set sparade ännu.</p>";
+        "<p>No sets saved yet.</p>";
 
 
     /*
@@ -697,13 +697,13 @@ async function openCustomWorkout(workout: any): Promise<void> {
             document.createElement("button");
 
         editButton.type = "button";
-        editButton.textContent = "Ändra";
+        editButton.textContent = "Edit";
 
         const deleteButton =
             document.createElement("button");
 
         deleteButton.type = "button";
-        deleteButton.textContent = "Radera";
+        deleteButton.textContent = "Delete";
 
         const showSavedSet = () => {
             setText.textContent =
@@ -728,11 +728,11 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
             const saveButton = document.createElement("button");
             saveButton.type = "button";
-            saveButton.textContent = "Spara ändring";
+            saveButton.textContent = "Save change";
 
             const cancelButton = document.createElement("button");
             cancelButton.type = "button";
-            cancelButton.textContent = "Avbryt";
+            cancelButton.textContent = "Cancel";
 
             cancelButton.addEventListener("click", showSavedSet);
 
@@ -741,7 +741,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
                 const reps = Number(repsInput.value);
 
                 if (weight < 0 || reps <= 0) {
-                    alert("Vikt kan inte vara mindre än 0 och reps måste vara större än 0.");
+                    alert("Weight cannot be less than 0 and reps must be greater than 0.");
                     return;
                 }
 
@@ -755,7 +755,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
                 if (error || !updatedSet) {
                     console.error("Kunde inte ändra set:", error);
-                    alert("Kunde inte ändra setet.");
+                    alert("Could not edit the set.");
                     return;
                 }
 
@@ -772,7 +772,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
         });
 
         deleteButton.addEventListener("click", async () => {
-            if (!window.confirm("Vill du radera det här setet?")) {
+            if (!window.confirm("Do you want to delete this set?")) {
                 return;
             }
 
@@ -784,7 +784,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
             if (error) {
                 console.error("Kunde inte radera set:", error);
-                alert("Kunde inte radera setet.");
+                alert("Could not delete the set.");
                 return;
             }
 
@@ -793,7 +793,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
             if (!todaySetsList.querySelector(".saved-set")) {
                 const emptyText = document.createElement("p");
                 emptyText.className = "empty-set-message";
-                emptyText.textContent = "Inga set sparade ännu.";
+                emptyText.textContent = "No sets saved yet.";
                 todaySetsList.appendChild(emptyText);
             }
         });
@@ -815,7 +815,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
         "empty-set-message";
 
     emptyText.textContent =
-        "Inga set sparade ännu.";
+        "No sets saved yet.";
 
     todaySetsList.appendChild(
         emptyText
@@ -905,7 +905,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
                 if (!currentCustomWorkoutId) {
 
                     alert(
-                        "Inget aktivt träningspass."
+                        "No active workout."
                     );
 
                     return;
@@ -942,7 +942,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
                 ) {
 
                     alert(
-                        "Vikt kan inte vara mindre än 0 och reps måste vara större än 0."
+                        "Weight cannot be less than 0 and reps must be greater than 0."
                     );
 
                     return;
@@ -986,7 +986,7 @@ async function openCustomWorkout(workout: any): Promise<void> {
                         );
 
                         alert(
-                            "Kunde inte starta träningspasset."
+                            "Could not start the workout."
                         );
 
                         return;
@@ -1175,14 +1175,14 @@ function renderWeightProgressChart(
     container.innerHTML = "";
 
     const title = document.createElement("h4");
-    title.textContent = "Viktutveckling per vecka";
+        title.textContent = "Weight progress per week";
     container.appendChild(title);
 
     const points = getWeeklyWeightAverages(entries);
 
     if (points.length === 0) {
         const emptyText = document.createElement("p");
-        emptyText.textContent = "Ingen sparad vikt ännu.";
+        emptyText.textContent = "No saved weight yet.";
         container.appendChild(emptyText);
         return;
     }
@@ -1220,7 +1220,7 @@ function renderWeightProgressChart(
     svg.setAttribute("role", "img");
     svg.setAttribute(
         "aria-label",
-        "Diagram som visar genomsnittlig vikt per set för varje vecka"
+        "Chart showing average weight per set for each week"
     );
 
     for (let tick = 0; tick <= 4; tick++) {
@@ -1291,7 +1291,7 @@ function renderWeightProgressChart(
     xAxisTitle.setAttribute("y", String(height - 4));
     xAxisTitle.setAttribute("text-anchor", "middle");
     xAxisTitle.setAttribute("class", "chart-axis-title");
-    xAxisTitle.textContent = "Vecka";
+    xAxisTitle.textContent = "Week";
     svg.appendChild(xAxisTitle);
 
     container.appendChild(svg);
@@ -1402,7 +1402,7 @@ async function renderAllCustomWorkoutHistory(
     } = await supabase.auth.getUser();
 
     if (!user) {
-        container.textContent = "Du måste vara inloggad för att se historiken.";
+        container.textContent = "You must be signed in to view history.";
         return;
     }
 
@@ -1415,17 +1415,17 @@ async function renderAllCustomWorkoutHistory(
 
     if (sessionsError) {
         console.error("Kunde inte hämta passets historik:", sessionsError);
-        container.textContent = "Kunde inte hämta historiken.";
+        container.textContent = "Could not load history.";
         return;
     }
 
     if (!sessions || sessions.length === 0) {
-        container.textContent = "Ingen historik sparad ännu.";
+        container.textContent = "No history saved yet.";
         return;
     }
 
     const historyTitle = document.createElement("h3");
-    historyTitle.textContent = "All historik";
+    historyTitle.textContent = "All history";
     container.appendChild(historyTitle);
 
     for (const session of sessions) {
@@ -1493,7 +1493,7 @@ async function renderPreviousWorkout(category: string): Promise<void> {
     if (categoryWorkouts.length === 0) {
 
         previousWorkoutElement.innerHTML =
-            "<p>Inget tidigare pass sparat ännu.</p>";
+            "<p>No previous workout saved yet.</p>";
 
         return;
     }
@@ -1556,7 +1556,7 @@ async function renderAllWorkoutHistory(
     container.innerHTML = "";
 
     if (categoryWorkouts.length === 0) {
-        container.innerHTML = "<p>Ingen historik sparad ännu.</p>";
+        container.innerHTML = "<p>No history saved yet.</p>";
         return;
     }
 
@@ -1583,7 +1583,7 @@ async function renderAllWorkoutHistory(
 
     const showPreviousButton = document.createElement("button");
     showPreviousButton.type = "button";
-    showPreviousButton.textContent = "Visa endast förra passet";
+    showPreviousButton.textContent = "Show previous workout only";
 
     showPreviousButton.addEventListener("click", async () => {
         await renderPreviousWorkout(category);
@@ -1632,7 +1632,7 @@ function renderActiveWorkout(category: string): void {
     ) {
 
         element.innerHTML =
-            "<p>Inga set sparade ännu.</p>";
+            "<p>No sets saved yet.</p>";
 
         return;
     }
@@ -1647,11 +1647,11 @@ function renderActiveWorkout(category: string): void {
         const editButton = document.createElement("button");
 
         editButton.type = "button";
-        editButton.textContent = "Ändra";
+        editButton.textContent = "Edit";
 
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
-        deleteButton.textContent = "Radera";
+        deleteButton.textContent = "Delete";
 
         const showSavedSet = () => {
             setText.textContent =
@@ -1674,11 +1674,11 @@ function renderActiveWorkout(category: string): void {
 
             const saveButton = document.createElement("button");
             saveButton.type = "button";
-            saveButton.textContent = "Spara ändring";
+            saveButton.textContent = "Save change";
 
             const cancelButton = document.createElement("button");
             cancelButton.type = "button";
-            cancelButton.textContent = "Avbryt";
+            cancelButton.textContent = "Cancel";
 
             cancelButton.addEventListener("click", showSavedSet);
 
@@ -1687,7 +1687,7 @@ function renderActiveWorkout(category: string): void {
                 const reps = Number(repsInput.value);
 
                 if (weight < 0 || reps <= 0) {
-                    alert("Vikt kan inte vara mindre än 0 och reps måste vara större än 0.");
+                    alert("Weight cannot be less than 0 and reps must be greater than 0.");
                     return;
                 }
 
@@ -1715,7 +1715,7 @@ function renderActiveWorkout(category: string): void {
         });
 
         deleteButton.addEventListener("click", async () => {
-            if (!window.confirm("Vill du radera det här setet?")) {
+            if (!window.confirm("Do you want to delete this set?")) {
                 return;
             }
 
@@ -1748,7 +1748,7 @@ async function updateActiveWorkoutSet(
     reps: number
 ): Promise<any | null> {
     if (!workout.databaseId) {
-        alert("Det här setet skapades innan ändra-funktionen lades till och kan inte ändras.");
+        alert("This set was created before editing was added and cannot be edited.");
         return null;
     }
 
@@ -1757,7 +1757,7 @@ async function updateActiveWorkoutSet(
     } = await supabase.auth.getUser();
 
     if (!user) {
-        alert("Du måste vara inloggad.");
+        alert("You must be signed in.");
         return null;
     }
 
@@ -1771,7 +1771,7 @@ async function updateActiveWorkoutSet(
 
     if (error || !data) {
         console.error("Kunde inte ändra set:", error);
-        alert("Kunde inte ändra setet.");
+        alert("Could not edit the set.");
         return null;
     }
 
@@ -1793,7 +1793,7 @@ async function deleteActiveWorkoutSet(
     workout: any
 ): Promise<boolean> {
     if (!workout.databaseId) {
-        alert("Det här setet skapades innan radera-funktionen lades till och kan inte raderas.");
+        alert("This set was created before deleting was added and cannot be deleted.");
         return false;
     }
 
@@ -1802,7 +1802,7 @@ async function deleteActiveWorkoutSet(
     } = await supabase.auth.getUser();
 
     if (!user) {
-        alert("Du måste vara inloggad.");
+        alert("You must be signed in.");
         return false;
     }
 
@@ -1956,7 +1956,7 @@ async function saveCustomWorkoutEntry(
             "Kunde inte spara eget träningspass:",
             JSON.stringify(error, null, 2)
         );
-        alert("Kunde inte spara träningspasset.");
+        alert("Could not save the workout.");
         return;
     }
 
@@ -2115,7 +2115,7 @@ async function finishWorkout(category: string): Promise<void> {
         activeWorkout.category !== category ||
         activeWorkout.workouts.length === 0
     ) {
-        alert("Du har inga sparade set i detta pass ännu.");
+    alert("You have no saved sets in this workout yet.");
         return;
     }
 
@@ -2564,7 +2564,7 @@ async function renderHistory(): Promise<void> {
             const deleteButton =
                 document.createElement("button");
 
-            deleteButton.textContent = "Radera pass";
+        deleteButton.textContent = "Delete workout";
 
             deleteButton.addEventListener("click", () => {
 
