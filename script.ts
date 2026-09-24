@@ -1068,6 +1068,11 @@ async function openCustomWorkout(workout: any): Promise<void> {
 
                 addTodaySet(savedSet);
 
+                await renderCustomWorkoutCharts(
+                    workout.id,
+                    user.id
+                );
+
 
                 console.log(
                     "Set sparat:",
@@ -1105,9 +1110,282 @@ async function openCustomWorkout(workout: any): Promise<void> {
             saveSetButton
         );
 
+        const chartContainer = document.createElement("div");
+        chartContainer.className = "exercise-progress";
+        chartContainer.setAttribute("data-exercise", exercise);
+
+        exerciseContainer.appendChild(chartContainer);
+
 
         customTrainingExercises.appendChild(
             exerciseContainer
+        );
+    }
+
+    await renderCustomWorkoutCharts(workout.id, user.id);
+}
+
+
+function getWeekStart(dateValue: string): string | null {
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    const dayOffset = (date.getDay() + 6) % 7;
+    date.setDate(date.getDate() - dayOffset);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function getWeeklyWeightAverages(entries: any[]): any[] {
+    const weeks = new Map<string, { total: number; count: number }>();
+
+    for (const entry of entries) {
+        const weekStart = getWeekStart(entry.created_at);
+        const weight = Number(entry.weight);
+
+        if (!weekStart || !Number.isFinite(weight)) {
+            continue;
+        }
+
+        const week = weeks.get(weekStart) || { total: 0, count: 0 };
+        week.total += weight;
+        week.count += 1;
+        weeks.set(weekStart, week);
+    }
+
+    return [...weeks.entries()]
+        .map(([weekStart, week]) => ({
+            weekStart,
+            averageWeight: week.total / week.count
+        }))
+        .sort((a, b) => a.weekStart.localeCompare(b.weekStart));
+}
+
+function renderWeightProgressChart(
+    container: HTMLElement,
+    entries: any[]
+): void {
+    container.innerHTML = "";
+
+    const title = document.createElement("h4");
+    title.textContent = "Viktutveckling per vecka";
+    container.appendChild(title);
+
+    const points = getWeeklyWeightAverages(entries);
+
+    if (points.length === 0) {
+        const emptyText = document.createElement("p");
+        emptyText.textContent = "Ingen sparad vikt ännu.";
+        container.appendChild(emptyText);
+        return;
+    }
+
+    const svgNamespace = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNamespace, "svg");
+    const width = 640;
+    const height = 260;
+    const margin = { top: 20, right: 24, bottom: 54, left: 60 };
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
+    const weights = points.map(point => point.averageWeight);
+    let minWeight = Math.min(...weights);
+    let maxWeight = Math.max(...weights);
+
+    if (minWeight === maxWeight) {
+        minWeight = Math.max(0, minWeight - 5);
+        maxWeight += 5;
+    } else {
+        const padding = (maxWeight - minWeight) * 0.1;
+        minWeight = Math.max(0, minWeight - padding);
+        maxWeight += padding;
+    }
+
+    const xPosition = (index: number) =>
+        points.length === 1
+            ? margin.left + chartWidth / 2
+            : margin.left + (index / (points.length - 1)) * chartWidth;
+
+    const yPosition = (weight: number) =>
+        margin.top + (1 - (weight - minWeight) / (maxWeight - minWeight)) * chartHeight;
+
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("class", "weight-progress-chart");
+    svg.setAttribute("role", "img");
+    svg.setAttribute(
+        "aria-label",
+        "Diagram som visar genomsnittlig vikt per set för varje vecka"
+    );
+
+    for (let tick = 0; tick <= 4; tick++) {
+        const value = minWeight + ((maxWeight - minWeight) * tick) / 4;
+        const y = yPosition(value);
+        const gridLine = document.createElementNS(svgNamespace, "line");
+        gridLine.setAttribute("x1", String(margin.left));
+        gridLine.setAttribute("x2", String(width - margin.right));
+        gridLine.setAttribute("y1", String(y));
+        gridLine.setAttribute("y2", String(y));
+        gridLine.setAttribute("class", "chart-grid-line");
+        svg.appendChild(gridLine);
+
+        const label = document.createElementNS(svgNamespace, "text");
+        label.setAttribute("x", String(margin.left - 10));
+        label.setAttribute("y", String(y + 4));
+        label.setAttribute("text-anchor", "end");
+        label.setAttribute("class", "chart-axis-label");
+        label.textContent = `${value.toFixed(1).replace(".", ",")} kg`;
+        svg.appendChild(label);
+    }
+
+    const path = document.createElementNS(svgNamespace, "path");
+    path.setAttribute(
+        "d",
+        points.map((point, index) =>
+            `${index === 0 ? "M" : "L"}${xPosition(index)} ${yPosition(point.averageWeight)}`
+        ).join(" ")
+    );
+    path.setAttribute("class", "chart-line");
+    svg.appendChild(path);
+
+    const tickIndexes = points.length <= 4
+        ? points.map((_, index) => index)
+        : [0, Math.round((points.length - 1) / 3), Math.round((points.length - 1) * 2 / 3), points.length - 1];
+
+    for (const index of tickIndexes) {
+        const point = points[index];
+        const dateLabel = new Date(`${point.weekStart}T00:00:00`)
+            .toLocaleDateString("sv-SE", { month: "short", day: "numeric" });
+        const label = document.createElementNS(svgNamespace, "text");
+        label.setAttribute("x", String(xPosition(index)));
+        label.setAttribute("y", String(height - 22));
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("class", "chart-axis-label");
+        label.textContent = dateLabel;
+        svg.appendChild(label);
+    }
+
+    for (let index = 0; index < points.length; index++) {
+        const point = points[index];
+        const circle = document.createElementNS(svgNamespace, "circle");
+        circle.setAttribute("cx", String(xPosition(index)));
+        circle.setAttribute("cy", String(yPosition(point.averageWeight)));
+        circle.setAttribute("r", "5");
+        circle.setAttribute("class", "chart-point");
+
+        const pointTitle = document.createElementNS(svgNamespace, "title");
+        pointTitle.textContent =
+            `Veckan som börjar ${point.weekStart}: ` +
+            `${point.averageWeight.toFixed(1).replace(".", ",")} kg per set`;
+        circle.appendChild(pointTitle);
+        svg.appendChild(circle);
+    }
+
+    const xAxisTitle = document.createElementNS(svgNamespace, "text");
+    xAxisTitle.setAttribute("x", String(margin.left + chartWidth / 2));
+    xAxisTitle.setAttribute("y", String(height - 4));
+    xAxisTitle.setAttribute("text-anchor", "middle");
+    xAxisTitle.setAttribute("class", "chart-axis-title");
+    xAxisTitle.textContent = "Vecka";
+    svg.appendChild(xAxisTitle);
+
+    container.appendChild(svg);
+}
+
+async function renderProgramCharts(category: string): Promise<void> {
+    const page = category === "Push"
+        ? pushPage
+        : category === "Pull"
+            ? pullPage
+            : legsPage;
+    const workouts = await getWorkoutsFromSupabase();
+    const categoryWorkouts = workouts.filter(
+        workout => workout.category === category
+    );
+
+    for (const exerciseElement of page.querySelectorAll(".exercise")) {
+        const exerciseName = exerciseElement.querySelector("h3")?.textContent;
+
+        if (!exerciseName) {
+            continue;
+        }
+
+        let chartContainer = exerciseElement.querySelector(
+            ".exercise-progress"
+        ) as HTMLElement | null;
+
+        if (!chartContainer) {
+            chartContainer = document.createElement("div");
+            chartContainer.className = "exercise-progress";
+            exerciseElement.appendChild(chartContainer);
+        }
+
+        renderWeightProgressChart(
+            chartContainer,
+            categoryWorkouts.filter(
+                workout => workout.exercise === exerciseName
+            )
+        );
+    }
+}
+
+async function getCustomWorkoutChartEntries(
+    customWorkoutId: any,
+    userId: string
+): Promise<any[]> {
+    const { data: sessions, error: sessionsError } = await supabase
+        .from("custom_workout_sessions")
+        .select("id, created_at, completed_at")
+        .eq("custom_workout_id", customWorkoutId)
+        .eq("user_id", userId);
+
+    if (sessionsError || !sessions || sessions.length === 0) {
+        return [];
+    }
+
+    const sessionDates = new Map(
+        sessions.map(session => [
+            session.id,
+            session.completed_at || session.created_at
+        ])
+    );
+
+    const { data: exercises, error: exercisesError } = await supabase
+        .from("custom_workout_exercises")
+        .select("workout_id, exercise, weight, created_at")
+        .in("workout_id", sessions.map(session => session.id))
+        .eq("user_id", userId);
+
+    if (exercisesError) {
+        console.error("Kunde inte hämta diagramdata:", exercisesError);
+        return [];
+    }
+
+    return (exercises || []).map(exercise => ({
+        ...exercise,
+        created_at: sessionDates.get(exercise.workout_id) || exercise.created_at
+    }));
+}
+
+async function renderCustomWorkoutCharts(
+    customWorkoutId: any,
+    userId: string
+): Promise<void> {
+    const entries = await getCustomWorkoutChartEntries(customWorkoutId, userId);
+
+    for (const chartContainer of customTrainingExercises.querySelectorAll(
+        ".exercise-progress"
+    )) {
+        const exerciseName = chartContainer.getAttribute("data-exercise");
+
+        renderWeightProgressChart(
+            chartContainer as HTMLElement,
+            entries.filter(entry => entry.exercise === exerciseName)
         );
     }
 }
