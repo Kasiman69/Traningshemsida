@@ -155,7 +155,9 @@ requestResetForm.addEventListener("submit", async event => {
     button.textContent = "Sending…";
     authMessage.textContent = "";
     try {
-        const redirect = new URL(window.location.pathname, window.location.origin);
+        const redirect = window.location.protocol === "file:"
+            ? new URL("https://kasiman69.github.io/Traningshemsida/")
+            : new URL(window.location.pathname, window.location.origin);
         redirect.searchParams.set("recovery", "1");
         const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.value.trim(), {
             redirectTo: redirect.href

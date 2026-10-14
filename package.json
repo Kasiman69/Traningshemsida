@@ -1,13 +1,45 @@
 {
+  "name": "pohner-training",
+  "version": "1.0.0",
+  "description": "Pöhner Training desktop workout tracker",
+  "author": "Pöhner",
+  "private": true,
+  "main": "desktop/main.cjs",
   "scripts": {
+    "desktop:build": "vite build --base=./ --outDir=desktop-dist && electron-builder --win nsis --x64",
     "dev": "vite",
     "build": "vite build"
+  },
+  "build": {
+    "appId": "se.pohner.training",
+    "productName": "Pöhner Training",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**/*",
+      "desktop-dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "Pohner-Training-Setup-${version}.exe"
+    }
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
     "vite": "^8.3.0"
   }
 }
